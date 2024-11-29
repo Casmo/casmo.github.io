@@ -3,11 +3,11 @@ layout: post
 title: Recover deleted Uploadcare files in Laravel
 ---
 
-Whoops, it could happen everyone, at any time. But this time I tried to configure Uploadcare in Filament and after uploading a new image. Everything was deleted in Uploadcare! Luckely for me, restoring all deleted files wasn't that hard but not well documented. Here is a simple snippet.
+Whoops, it could happen everyone. But this time it happend to me. I tried to configure Uploadcare in Filament and after uploading a new image everything was deleted in Uploadcare! Luckely for me, restoring all deleted files wasn't hard but not well documented. Here is a simple snippet.
 
 -----
 
-```php
+{% highlight php linenos %}
 // web.php
 
 use Illuminate\Support\Facades\Http;
@@ -32,4 +32,4 @@ Route::get('/test', function () {
         dump($file['uuid'] .' recovered.');
     }
 });
-```
+{% endhighlight %}
