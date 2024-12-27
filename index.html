@@ -32,7 +32,7 @@ Currently working fulltime with Laravel, React, Filament and Unreal Engine (C++ 
 
     <time datetime="{{ post.date | date_to_xmlschema }}" class="post-date">{{ post.date | date_to_string }}</time>
 
-    {{ post.content }}
+    {{ post.content | truncate: 255 }}
   </article>
   {% endfor %}
 </div>
