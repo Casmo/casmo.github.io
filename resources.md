@@ -18,3 +18,4 @@ Checkout some cool stuff.
 Some must reads.
 
 * <a href="https://www.amazon.com/Art-Game-Design-Lenses-Third-dp-1138632058/dp/1138632058">The Art of Game Design: A Book of Lenses by Jesse Schell</a>
+* <a href="https://book.leveldesignbook.com/">Level Design Book - Free online resource for level design</a>
