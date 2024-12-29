@@ -39,6 +39,10 @@ img {
   border-radius: var(--border-radius);
 }
 
+img.color-palette {
+  border: 10px solid white;
+}
+
 .rounded-full {
   border-radius: 9999px;
 }
