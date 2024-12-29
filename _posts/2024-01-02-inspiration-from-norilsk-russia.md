@@ -10,5 +10,3 @@ I'm always drawn to dystopian style in movies, games and books. I think this lov
 This is Norilsk, Russia. Image by [bclx99](https://www.reddit.com/r/UrbanHell/comments/1f68q64/norilsk_russia/) via Reddit.
 
 <img src="assets/posts/Norilsk-Russia-colors.jpg" />
-
-{% endhighlight %}
