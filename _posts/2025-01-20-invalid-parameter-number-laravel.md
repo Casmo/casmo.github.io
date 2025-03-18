@@ -9,7 +9,7 @@ If you encounter the following error in combination with `selectRaw()` or `where
 
 ```
 SQLSTATE[HY093]: Invalid parameter number (Connection: mysql, SQL: ...)
-````
+```
 
 -----
 
