@@ -27,15 +27,16 @@ Currently working fulltime with Laravel, React, Filament and Unreal Engine (C++ 
 <div class="posts">
   {% for post in paginator.posts %}
   <article class="post">
+
+    <time datetime="{{ post.date | date_to_xmlschema }}" class="post-date">{{ post.date | date_to_string }}</time>
+
     <h3 class="post-title">
       <a href="{{ post.url | relative_url }}">
         {{ post.title }}
       </a>
     </h3>
 
-    <time datetime="{{ post.date | date_to_xmlschema }}" class="post-date">{{ post.date | date_to_string }}</time>
-
-    {{ post.content | truncate: 255 }}
+    <div class="post-body">{{ post.content | truncate: 255 }}</div>
   </article>
   {% endfor %}
 </div>
