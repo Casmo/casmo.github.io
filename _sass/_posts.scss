@@ -23,6 +23,16 @@
 
 }
 
+.post-read-more {
+  color: var(--link-color);
+  text-decoration: none;
+}
+.post-read-more:hover,
+.post-read-more:focus {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
 .page-title,
 .post-title {
   color: var(--heading-color);

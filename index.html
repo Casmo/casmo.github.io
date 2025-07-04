@@ -37,6 +37,10 @@ Currently working fulltime with Laravel, React, Filament and Unreal Engine (C++ 
     </h3>
 
     <div class="post-body">{{ post.content | split:'<!--break-->' | first }}</div>
+
+    <a class="post-read-more" href="{{ post.url | relative_url }}">
+      {{ post.title }}
+    </a>
   </article>
   {% endfor %}
 </div>
