@@ -7,7 +7,7 @@ When working with emails you sometimes want to clear all html, spaces and other 
 
 Here is a snippet that removes all hard-to-get spaces, removes all html and decode special characters.
 
------
+<!--break-->
 
 {% highlight php linenos %}
 

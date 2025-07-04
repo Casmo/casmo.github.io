@@ -11,7 +11,7 @@ If you encounter the following error in combination with `selectRaw()` or `where
 SQLSTATE[HY093]: Invalid parameter number (Connection: mysql, SQL: ...)
 ```
 
------
+<!--break-->
 
 The reason for this is that cursor pagination is not using `offset`, but rather `order by ?`. In my case, I was ordering the results by a field `_score`. Yours might be different.
 

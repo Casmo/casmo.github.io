@@ -36,7 +36,7 @@ Currently working fulltime with Laravel, React, Filament and Unreal Engine (C++ 
       </a>
     </h3>
 
-    <div class="post-body">{{ post.content | truncate: 255 }}</div>
+    <div class="post-body">{{ post.content | split:'<!--break-->' | first }}</div>
   </article>
   {% endfor %}
 </div>

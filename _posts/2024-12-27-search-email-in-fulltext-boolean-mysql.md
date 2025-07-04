@@ -5,7 +5,7 @@ title: Search (part) of an email address in mysql with fulltext.
 
 Whenever you work with searching in MySQL you are quickly using fulltext in boolean mode. This is a powerful way to finetune a search but has it limitions with special characters, like the at-sign.
 
------
+<!--break-->
 
 When searching (parts of) an email address in MySQL you probably encountered the following error:
 

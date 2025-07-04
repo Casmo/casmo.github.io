@@ -5,7 +5,7 @@ title: Recover deleted Uploadcare files in Laravel
 
 Whoops, it could happen everyone. But this time it happend to me. I tried to configure Uploadcare in Filament and after uploading a new image everything was deleted in Uploadcare! Luckely for me, restoring all deleted files wasn't hard but not well documented. Here is a simple snippet.
 
------
+<!--break-->
 
 {% highlight php linenos %}
 // web.php

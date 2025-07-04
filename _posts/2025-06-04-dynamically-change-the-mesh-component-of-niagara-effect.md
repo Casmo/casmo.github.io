@@ -5,6 +5,8 @@ title: Dynamically change the mesh component of niagara effect
 
 When creating an Niagara effect in Unreal you can spawn the particles around a mesh component. This is awesome if you have an effect that should cover a full object, like flames or smoke.
 
+<!--break-->
+
 In [our game Kabonk!](https://sparkofchaos.com/games/kabonk!.html) we needed a similar effect for around our paddle. The thing was. Our paddle could change shape and thus we needed to update the Niagara effect accordingly. Here is how to use the the Blueprint node "Set Niagara Static Mesh Component".
 
 First of all. Create a Niagara Effect with a Static Mesh Location node in the Particle Spawn.
