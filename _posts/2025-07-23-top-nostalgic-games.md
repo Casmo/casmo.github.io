@@ -12,7 +12,7 @@ Fernweh? It is a German word that cannot be translated, but is described as "a p
 Here are some of those games that give me similar vibes, just by looking at them. Give them some love.
 
 ## The Longest Journey
-<a href="https://store.steampowered.com/app/6310/The_Longest_Journey/"><img class="color-palette" src="/assets/posts/the-longest-journey.jpg" /></a>
+<a href="https://store.steampowered.com/app/6310/The_Longest_Journey/"><img class="color-palette" src="/assets/posts/longest-journey.jpg" /></a>
 
 ## The Drifter
 <a href="https://store.steampowered.com/app/1170570/The_Drifter/"><img class="color-palette" src="/assets/posts/the-drifter.jpg" /></a>
