@@ -11,26 +11,26 @@ Fernweh? It is a German word that cannot be translated, but is described as "a p
 
 Here are some of those games that give me similar vibes, just by looking at them. Give them some love.
 
-The Longest Journey
+## The Longest Journey
 
 Steam: https://store.steampowered.com/app/6310/The_Longest_Journey/
 
-The Drifter
+## The Drifter
 
 Steam: https://store.steampowered.com/app/1170570/The_Drifter/
 
-Long Gone
+## Long Gone
 
 Steam: https://store.steampowered.com/app/1977610/Long_Gone/
 
-Zarya
+## Zarya
 
 Steam: https://store.steampowered.com/app/2786710/Zarya/
 
-Wadjet Eye Games (developer)
+## Wadjet Eye Games (developer)
 Most of their games are eye candies.
 Steam: https://store.steampowered.com/publisher/WadjetEyeGames
 
-Blade Runner
+## Blade Runner
 
 Steam: https://store.steampowered.com/app/1678420/Blade_Runner_Enhanced_Edition/
