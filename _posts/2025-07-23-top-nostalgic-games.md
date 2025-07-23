@@ -12,25 +12,20 @@ Fernweh? It is a German word that cannot be translated, but is described as "a p
 Here are some of those games that give me similar vibes, just by looking at them. Give them some love.
 
 ## The Longest Journey
-
-Steam: https://store.steampowered.com/app/6310/The_Longest_Journey/
+<a href="https://store.steampowered.com/app/6310/The_Longest_Journey/"><img class="color-palette" src="/assets/posts/the-longest-journey.jpg" /></a>
 
 ## The Drifter
-
-Steam: https://store.steampowered.com/app/1170570/The_Drifter/
+<a href="https://store.steampowered.com/app/1170570/The_Drifter/"><img class="color-palette" src="/assets/posts/the-drifter.jpg" /></a>
 
 ## Long Gone
-
-Steam: https://store.steampowered.com/app/1977610/Long_Gone/
+<a href="https://store.steampowered.com/app/1977610/Long_Gone/"><img class="color-palette" src="/assets/posts/long-gone.jpg" /></a>
 
 ## Zarya
-
-Steam: https://store.steampowered.com/app/2786710/Zarya/
+<a href="https://store.steampowered.com/app/2786710/Zarya/"><img class="color-palette" src="/assets/posts/zarya.jpg" /></a>
 
 ## Wadjet Eye Games (developer)
 Most of their games are eye candies.
-Steam: https://store.steampowered.com/publisher/WadjetEyeGames
+<a href="https://store.steampowered.com/publisher/WadjetEyeGames">Wadjet Eye Games</a>
 
 ## Blade Runner
-
-Steam: https://store.steampowered.com/app/1678420/Blade_Runner_Enhanced_Edition/
+<a href="https://store.steampowered.com/app/1678420/Blade_Runner_Enhanced_Edition/"><img class="color-palette" src="/assets/posts/blade-runner.jpg" /></a>
