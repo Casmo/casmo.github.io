@@ -7,8 +7,6 @@ In one of our games we have a physics object (a ball) that can only move on the 
 
 <!--break-->
 
-In one of our games we have a physics object (a ball) that can only move on the XY-axis. It should not move on the Z. The most simple way to do this is the constrain the movement of Z in the mesh physics property.
-
 Now we had an issue that when the object changed size the actor whould get stuck into the floor. Here are some problems and possible solution you can use in the Unreal Engine:
 
 **Remove the constrain**
