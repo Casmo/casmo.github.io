@@ -7,7 +7,7 @@ title: Resources
 
 Checkout some cool stuff.
 
-* <a href="https://vormkracht10.nl" target="_blank">Vormkracht10.nl</a> - Top-notch webbuilders from The Netherlands
+* <a href="https://ux.nl" target="_blank">UX.nl</a> - Top-notch webbuilders from The Netherlands
 * <a href="https://sparkofchaos.com" target="_blank">Sparkofchaos.com</a> - Something awesome in the works
 * <a href="https://couchfriends.com" target="_blank">Couchfriends.com</a> - Multiplayer games in the browser a made-with-love hobby project
 * <a href="https://github.com/casmo" target="_blank">Github.com/casmo</a> - My GitHub page
