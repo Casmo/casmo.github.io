@@ -17,6 +17,8 @@ Checkout some cool stuff.
 
 Here are some books I enjoyed over the years.
 
+<strong>Dungeons & Dragons</strong> - No one can ignore the impact Dungeons and Dragons have on practically all games out there. In love the game, the Game Master manual, the Player Handbook and many of the shows (live plays) that live around this culture. I started with 4th edition and have been playing as Dungeon Master for countless times. While the focus of the books are around the tabletop game, it is the foundation of almost all video games out there.
+
 <strong>The Art of Game Design: A Book of Lenses by Jesse Schell</strong> - This book completely changed the way I think about games as a player and as a developer. Jesse uses different 'lenses' that will give you better understanding the underlying working of *why* games (or rather, experiences) work the way they do. Asking the right questions to tweak and improve your game in ways that you haven't thought about.
 
 <a href="https://book.leveldesignbook.com/" target="_blank">Level Design Book - Free online resource for level design</a> - Amazing and free online resources about level design.
