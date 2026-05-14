@@ -17,8 +17,13 @@ Checkout some cool stuff.
 
 Some must reads.
 
-* <a href="https://www.amazon.com/Art-Game-Design-Lenses-Third-dp-1138632058/dp/1138632058" target="_blank">The Art of Game Design: A Book of Lenses by Jesse Schell</a>
+<strong>The Art of Game Design: A Book of Lenses by Jesse Schell</strong>
 This book completely changed the way I think about games as a player and as a developer. Jesse uses different 'lenses' that will give you better understanding the underlying working of *why* games (or rather, experiences) work the way they do. Asking the right questions to tweak and improve your game in ways that you haven't thought about.
-* <a href="https://book.leveldesignbook.com/" target="_blank">Level Design Book - Free online resource for level design</a>
-* <a href="https://www.amazon.com/Vision-Composition-Hans-P-Bacher/dp/1786272202" target="_blank">Vision: Color and Composition for Film by Hans P Bacher</a>
+
+<a href="https://book.leveldesignbook.com/" target="_blank">Level Design Book - Free online resource for level design</a>
+Amazing and free online resources about level design.
+
+<strong>Vision: Color and Composition for Film by Hans P Bacher</strong>
 This book is such an amazing source of information about colors, compositions, framing and much more. While the title suggest it is for film, almost everything can and will be applicable for games. While rich in information the book stands out on the visuals that is an unlimited source of inspiration.
+
+<strong>The Legend of Zelda: Breath of the Wild-Creating a Champion</strong>
