@@ -1,0 +1,84 @@
+@import "tailwindcss";
+@import "highlight.js/styles/atom-one-dark.css";
+@plugin "@tailwindcss/typography";
+@source "../views";
+@source "../../content";
+
+@font-face {
+  font-family: "SpaceMono";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/SpaceMono-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SpaceMono";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/SpaceMono-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SpaceMono";
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src: url("../fonts/SpaceMono-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SpaceMono";
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+  src: url("../fonts/SpaceMono-BoldItalic.ttf") format("truetype");
+}
+
+@layer theme {
+  :root {
+    --font-sans: "SpaceMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --default-mono-font-family: "SpaceMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans, "SpaceMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+  }
+  
+  a {
+    @apply text-sky-500;
+  }
+  
+  a:hover {
+    @apply text-sky-400;
+  }
+
+  h2 {
+    @apply text-2xl font-bold mb-4 mt-8;
+  }
+  ul {
+    @apply list-disc list-inside mb-4;
+  }
+  p {
+    @apply mb-4;
+  }
+}
+
+@keyframes writing-cursor {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .writing-cursor {
+    animation: writing-cursor 1s infinite;
+  }
+}

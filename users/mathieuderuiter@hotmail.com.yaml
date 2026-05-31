@@ -1,0 +1,11 @@
+name: Mathieu
+super: true
+id: 3ab86282-d8ca-45a1-bff1-07230cbc2c23
+password_hash: $2y$12$b.ml6Xkd2WCyDSll86IDGub8UmEAENtXd.kw6.sMcCeAGWLMyh2yW
+preferences:
+  collections:
+    pages:
+      view: tree
+    blog:
+      view: list
+      after_save: continue_editing
