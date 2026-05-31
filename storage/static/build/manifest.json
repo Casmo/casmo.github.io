@@ -1,0 +1,39 @@
+{
+  "resources/css/site.css": {
+    "file": "assets/site-CcC3wNf7.css",
+    "name": "site",
+    "names": [
+      "site.css"
+    ],
+    "src": "resources/css/site.css",
+    "isEntry": true,
+    "assets": [
+      "assets/SpaceMono-Regular-Ba0nOT4a.ttf",
+      "assets/SpaceMono-Bold-Dyp2aizM.ttf",
+      "assets/SpaceMono-Italic-Bsn02tz1.ttf",
+      "assets/SpaceMono-BoldItalic-Cfx5I7zT.ttf"
+    ]
+  },
+  "resources/fonts/SpaceMono-Bold.ttf": {
+    "file": "assets/SpaceMono-Bold-Dyp2aizM.ttf",
+    "src": "resources/fonts/SpaceMono-Bold.ttf"
+  },
+  "resources/fonts/SpaceMono-BoldItalic.ttf": {
+    "file": "assets/SpaceMono-BoldItalic-Cfx5I7zT.ttf",
+    "src": "resources/fonts/SpaceMono-BoldItalic.ttf"
+  },
+  "resources/fonts/SpaceMono-Italic.ttf": {
+    "file": "assets/SpaceMono-Italic-Bsn02tz1.ttf",
+    "src": "resources/fonts/SpaceMono-Italic.ttf"
+  },
+  "resources/fonts/SpaceMono-Regular.ttf": {
+    "file": "assets/SpaceMono-Regular-Ba0nOT4a.ttf",
+    "src": "resources/fonts/SpaceMono-Regular.ttf"
+  },
+  "resources/js/site.js": {
+    "file": "assets/site-C9-Reycn.js",
+    "name": "site",
+    "src": "resources/js/site.js",
+    "isEntry": true
+  }
+}

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Move an actor in Unreal with Physics Constrain</title>
+        <link rel="preload" as="style" href="http://casmo.github.io.test/build/assets/site-CcC3wNf7.css" /><link rel="modulepreload" as="script" href="http://casmo.github.io.test/build/assets/site-C9-Reycn.js" /><link rel="stylesheet" href="http://casmo.github.io.test/build/assets/site-CcC3wNf7.css" /><script type="module" src="http://casmo.github.io.test/build/assets/site-C9-Reycn.js"></script>    </head>
+    <body class="bg-[#1f2329] leading-normal dark:text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="py-8">
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/">/About</a>
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/blog">/Blog</a>
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/resources">/Resources</a>
+                    </div>
+
+        
+  <p>
+    <strong>Move an actor in Unreal with Physics Constrain:$</strong><br />
+    <span class="text-lime-500">&gt; Date:</span> September 20, 2025<br />
+    <span class="text-lime-500">&gt; Tags:</span> Unreal Engine<br />
+  </p>
+  <div>
+    <p>In one of our games we have a physics object (a ball) that can only move on the XY-axis. It should not move on the Z. The most simple way to do this is the constrain the movement of Z in the mesh physics property.</p>
+<p>Now we had an issue that when the object changed size the actor would get stuck into the floor. Here are some problems and possible solution you can use in the Unreal Engine:</p>
+<p><strong>Remove the constrain</strong>: One solution would be to remove the constrain and in tick() always set the Z on a fixed value. Problem: This would run into the problem that tick and physics are two separated loops. Meaning that the position changed on the actor might be overridden by the physics tick.</p>
+<p><strong>Change pivot</strong>: We may change the pivot to the bottom of the actor. This is good solution since changing the actor’s size will move the ball ‘upwards’ and not through the floor. Problem: We are attaching effects and niagara particles on the actor. These will need to be adjusted because now they are attached on the bottom of the actor instead of in the center.</p>
+<p><strong>Temporary remove the constrain</strong>: We tried to remove the constrained, set the new Z position and then enable the constrain back after moving. Problem: This didn’t work. We could not remove the constrain in Blueprint (there is no node for it) and probably we would have run in the same issue as removing the constrain all together.</p>
+<p><strong>Use constrain mode</strong>: Unreal also provides a constrain mode. There are a few option to choose from but for our purpose we need to use “Mode XY”. When we wanted to move the position we just set the mode to “None”, changed the position and then changed the mode by to “XY”. This did even work in tick!</p>
+<p><strong>Best solution</strong>: The best solution would probably using the PhysicsConstraintComponent. This component can be adjusted easily through blueprint with a lot of options.</p>
+<p>Good luck!</p>
+
+  </div>
+
+      <!--  -->
+
+          <div class="post">
+        <a href="/read/ultra-wide-wallpaper-of-top-100-steam-games-week-3-2026">Ultra wide wallpaper of top 100 Steam games week 3, 2026</a>
+      </div>
+          <div class="post">
+        <a href="/read/fernweh-camping-tycoon">Fernweh - Camping Tycoon</a>
+      </div>
+    
+      </body>
+</html>

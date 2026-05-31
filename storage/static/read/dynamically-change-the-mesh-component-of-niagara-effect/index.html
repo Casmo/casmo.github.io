@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Dynamically change the mesh component of niagara effect</title>
+        <link rel="preload" as="style" href="http://casmo.github.io.test/build/assets/site-CcC3wNf7.css" /><link rel="modulepreload" as="script" href="http://casmo.github.io.test/build/assets/site-C9-Reycn.js" /><link rel="stylesheet" href="http://casmo.github.io.test/build/assets/site-CcC3wNf7.css" /><script type="module" src="http://casmo.github.io.test/build/assets/site-C9-Reycn.js"></script>    </head>
+    <body class="bg-[#1f2329] leading-normal dark:text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="py-8">
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/">/About</a>
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/blog">/Blog</a>
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/resources">/Resources</a>
+                    </div>
+
+        
+  <p>
+    <strong>Dynamically change the mesh component of niagara effect:$</strong><br />
+    <span class="text-lime-500">&gt; Date:</span> April 5, 2025<br />
+    <span class="text-lime-500">&gt; Tags:</span> Unreal Engine<br />
+  </p>
+  <div>
+    <p>When creating an Niagara effect in Unreal you can spawn the particles around a mesh component. This is awesome if you have an effect that should cover a full object, like flames or smoke.</p>
+<p>In our game <a href="https://store.steampowered.com/app/3628790/Kabonk/">Kabonk!</a> we needed a similar effect for around our paddle. The thing was. Our paddle could change shape and thus we needed to update the Niagara effect accordingly. Here is how to use the the Blueprint node “Set Niagara Static Mesh Component”.</p>
+<p>First of all. Create a Niagara Effect with a Static Mesh Location node in the Particle Spawn.<br />
+<img src="/assets/unreal-engine/static-mesh-location-spawn.png" alt="" /><br />
+Click the node and on the right side under “Static Mesh” click the dropdown and select “Read from new User parameter”.<br />
+<img src="/assets/unreal-engine/read-from-new-user-paramater.png" alt="" /><br />
+Give it a name, e.g. “MyCustomMesh”. This name will be used later.</p>
+<p>Next, in Blueprint you can use the Set Niagara Static Mesh Component. The parameters should be filled: Niagara System: The Niagara component Override Name: Your User Paramter (in our example “MyCustomMesh”) Static Mesh Component: The Mesh Component. In this example I have and actor “Paddle” that has a “Paddle” as component name (I know).</p>
+<p>It should look somewhat like this:<br />
+<img src="/assets/unreal-engine/set-niagara-static-mesh-component.png" alt="" /><br />
+If it doesn’t work, try the following:<br />
+<img src="http://mathieuderuiter.test/assets/unreal-engine/reinitialize-system.png" alt="" /><br />
+Add a Reinitialize System node after changing the mesh.</p>
+<p>And make sure that the meshes you use have CPU Access enabled (open Mesh, check Allow CPUAccess).<br />
+<img src="http://mathieuderuiter.test/assets/unreal-engine/allow-cpuaccess-mesh.png" alt="" /><br />
+Final result:<br />
+<video src="/assets/unreal-engine/kabonk-niagara-effect-dynamic-mesh.webm" controls="" loop="" muted="" playsinline="" width="640" height="360"></video></p>
+
+  </div>
+
+      <!--  -->
+
+          <div class="post">
+        <a href="/read/inspiration-from-chongquin-in-china">Inspiration from Chongquin in China</a>
+      </div>
+          <div class="post">
+        <a href="/read/top-games-that-bring-nostalgia-back-to-life">Top games that bring nostalgia back to life</a>
+      </div>
+    
+      </body>
+</html>

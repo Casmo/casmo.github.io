@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Invalid parameter number in Laravel Cursor Pagination</title>
+        <link rel="preload" as="style" href="http://casmo.github.io.test/build/assets/site-CcC3wNf7.css" /><link rel="modulepreload" as="script" href="http://casmo.github.io.test/build/assets/site-C9-Reycn.js" /><link rel="stylesheet" href="http://casmo.github.io.test/build/assets/site-CcC3wNf7.css" /><script type="module" src="http://casmo.github.io.test/build/assets/site-C9-Reycn.js"></script>    </head>
+    <body class="bg-[#1f2329] leading-normal dark:text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="py-8">
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/">/About</a>
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/blog">/Blog</a>
+                            <a class="text-lg text-lime-500 hover:text-lime-400" href="/resources">/Resources</a>
+                    </div>
+
+        
+  <p>
+    <strong>Invalid parameter number in Laravel Cursor Pagination:$</strong><br />
+    <span class="text-lime-500">&gt; Date:</span> January 19, 2025<br />
+    <span class="text-lime-500">&gt; Tags:</span> Laravel<br />
+  </p>
+  <div>
+    <p>I was working with raw queries and selects in Laravel in combination with Laravel’s Cursor Pagination. This worked fine until I want to the next page.</p>
+<p>If you encounter the following error in combination with selectRaw() or whereRaw() in Laravel, I hope this solution works for you.</p>
+<pre><code class="language-bash">SQLSTATE[HY093]: Invalid parameter number (Connection: mysql, SQL: ...)
+</code></pre>
+<p>The reason for this is that cursor pagination is not using offset, but rather order by ?. In my case, I was ordering the results by a field _score. Yours might be different.</p>
+<pre><code class="language-php">$query = Model::query()
+    -&gt;selectRaw('MATCH(`subject`, `body`) AGAINST(? IN BOOLEAN MODE) as _score', [&quot;'&quot;. $search .&quot;'&quot;])
+    -&gt;whereRaw('MATCH(`subject`, `body`) AGAINST(? IN BOOLEAN MODE) &gt; 0', [&quot;'&quot;. $search .&quot;'&quot;]);
+
+if (request()-&gt;get('cursor')) {
+    $cursorPaginator = CursorPaginator::resolveCurrentCursor('cursor', null);
+    $query-&gt;addBinding($cursorPaginator-&gt;parameter('_score'), 'where'); // Make sure parameter _score is available
+}
+
+$result = $query-&gt;cursorPaginate(20);
+
+dump($result);
+</code></pre>
+<p>Good luck!</p>
+
+  </div>
+
+      <!--  -->
+
+          <div class="post">
+        <a href="/read/composer-update-hanging-on-loading-composer-repositories-with-package-information">Composer update hanging on Loading composer repositories with package information</a>
+      </div>
+          <div class="post">
+        <a href="/read/dynamically-change-the-mesh-component-of-niagara-effect">Dynamically change the mesh component of niagara effect</a>
+      </div>
+    
+      </body>
+</html>
