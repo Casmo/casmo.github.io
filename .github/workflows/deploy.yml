@@ -38,7 +38,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
       - name: Build static assets
-        run: php please ssg:generate
+        run: | 
+          php artisan key:generate
+          php please ssg:generate
         env:
           APP_ENV: production
           APP_URL: https://mathieuderuiter.nl
