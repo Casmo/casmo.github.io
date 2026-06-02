@@ -39,6 +39,14 @@ jobs:
           php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
+      - name: Setup npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install npm dependencies
+        run: | 
+          npm install
+          npm run build
       - name: Build static assets
         run: | 
           cp .env.example .env
