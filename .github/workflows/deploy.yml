@@ -31,6 +31,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
+      - name: Build static assets
+        run: php please ssg:generate
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
