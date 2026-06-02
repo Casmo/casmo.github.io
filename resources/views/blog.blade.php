@@ -2,11 +2,13 @@
 
 @section('body')
 
-  <p>
-    <strong>{{ $title }}:$</strong><br />
-    <span class="text-lime-500">&gt; Date:</span> {{ $date->format('F j, Y') }}<br />
-    <span class="text-lime-500">&gt; Tags:</span> {{ $categories->pluck('title')->join(', ') }}<br />
-  </p>
+
+    <p>
+      <span class="text-lime-500">{{ strtolower($author->name) }}@laptop:{{ $categories->first()?->title }}$</span> cat <strong>{{ $slug }}.txt</strong><br />
+      <span class="text-lime-500">&gt; Title:</span> {{ $title }}</span><br />
+      <span class="text-lime-500">&gt; Date:</span> {{ $date->format('F j, Y') }}</span><br />
+      <span class="text-lime-500">&gt; Tags:</span> {{ $categories->pluck('title')->join(', ') }}<br />
+    </p>
   <div>
     {!! $content !!}
   </div>
