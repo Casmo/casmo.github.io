@@ -30,13 +30,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          clean: true
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
       - name: Install dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist
       - name: Build static assets
         run: | 
           php artisan key:generate
@@ -49,7 +51,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload storage/static
           path: 'storage/static'
       - name: Deploy to GitHub Pages
         id: deployment
