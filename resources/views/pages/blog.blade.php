@@ -9,7 +9,6 @@
       @foreach($posts as $post)
         <div class="mb-8">
           <p>
-            <span class="text-lime-500">{{ strtolower($post->author->name) }}@laptop:{{ $post->categories->first()?->title }}$</span> cat <strong>{{ $post->slug }}.txt</strong><br />
             <span class="text-lime-500">&gt; Title:</span> {{ $post->title }}</span><br />
             <span class="text-lime-500">&gt; Date:</span> {{ $post->date->format('F j, Y') }}</span><br />
             <span class="text-lime-500">&gt; Excerpt:</span> {{ Str::limit(strip_tags($post->content), 150) }}</span><br />

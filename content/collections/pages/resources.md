@@ -3,9 +3,9 @@ id: 6b218b47-21d3-45d1-a05d-a98610c5555d
 blueprint: page
 title: Resources
 updated_by: 3ab86282-d8ca-45a1-bff1-07230cbc2c23
-updated_at: 1780224036
+updated_at: 1780933328
 ---
-**mathieu@laptop:Resources$**
+**mathieu@laptop:Resources$** cat useful-stuff.txt
 Checkout some cool stuff.<span class="writing-cursor">|</span>
 
 - [UX.nl](https://ux.nl) - Top-notch webbuilders from The Netherlands
