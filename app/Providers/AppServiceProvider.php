@@ -26,9 +26,8 @@ class AppServiceProvider extends ServiceProvider
             $pages = Entry::query()
                 ->where('published', true)
                 ->get();
-            echo "Generating Open Graph images for " . $pages->count() . " pages...\n";
-                if (!is_dir(public_path('assets/pages'))) {
-                    mkdir(public_path('assets/pages'), 0755, true);
+                if (!is_dir(base_path('storage/static/assets/pages'))) {
+                    mkdir(base_path('storage/static/assets/pages'), 0755, true);
                 }
                 $avatar = imagecreatefrompng(resource_path('img/casmo.png'));
                     $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
@@ -88,9 +87,9 @@ class AppServiceProvider extends ServiceProvider
                     }
 
                     imagecopy($image, $avatar, 50, 265, 0, 0, imagesx($avatar), imagesy($avatar));
-                    imagepng($image, public_path('assets/pages/' . $page->slug . '.png'));
-                    chmod(public_path('assets/pages/' . $page->slug . '.png'), 0644);
-                    echo "Generated Open Graph image " . public_path('assets/pages/' . $page->slug . '.png'). "\n";
+                    imagepng($image, base_path('storage/static/assets/pages/' . $page->slug . '.png'));
+
+                    echo "Generated Open Graph image " . base_path('storage/static/assets/pages/' . $page->slug . '.png'). "\n";
                 }
         });
     }
