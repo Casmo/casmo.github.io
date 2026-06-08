@@ -59,6 +59,9 @@
   h2 {
     @apply text-2xl font-bold mb-4 mt-8;
   }
+  h3 {
+    @apply text-xl font-bold mb-4 mt-6;
+  }
   ul {
     @apply list-disc list-inside mb-4;
   }

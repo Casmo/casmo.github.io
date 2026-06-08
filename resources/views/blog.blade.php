@@ -2,7 +2,7 @@
 
 @section('body')
     <p>
-      <strong{{ strtolower($author->name) }}@laptop:{{ $categories->first()?->title }}$</strong> cat <strong>{{ $slug }}.txt</strong><br />
+      <strong>{{ strtolower($author->name) }}@laptop:~/Content/{{ $categories->first()?->title }}$</strong> cat <strong>{{ $slug }}.txt</strong><br />
       <span class="text-lime-500">&gt; Title:</span> {{ $title }}</span><br />
       <span class="text-lime-500">&gt; Date:</span> {{ $date->format('F j, Y') }}</span><br />
       <span class="text-lime-500">&gt; Tags:</span> {{ $categories->pluck('title')->join(', ') }}<br />
