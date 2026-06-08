@@ -26,11 +26,11 @@ class AppServiceProvider extends ServiceProvider
             $pages = Entry::query()
                 ->where('published', true)
                 ->get();
-                if (!is_dir(base_path('storage/static/assets/pages'))) {
-                    mkdir(base_path('storage/static/assets/pages'), 0755, true);
+                if (!is_dir(config('statamic.ssg.output_path') . '/assets/pages')) {
+                    mkdir(config('statamic.ssg.output_path') . '/assets/pages', 0755, true);
                 }
                 $avatar = imagecreatefrompng(resource_path('img/casmo.png'));
-                    $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
+                $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
 
                 $upscale = 2;
                 foreach ($pages as $page) {
@@ -88,7 +88,7 @@ class AppServiceProvider extends ServiceProvider
                     }
 
                     imagecopy($image, $avatar, 50 * $upscale, 265 * $upscale, 0, 0, imagesx($avatar), imagesy($avatar));
-                    imagepng($image, base_path('storage/static/assets/pages/' . $page->slug . '.png'));
+                    imagepng($image, config('statamic.ssg.output_path') . '/assets/pages/' . $page->slug . '.png');
                 }
         });
     }
