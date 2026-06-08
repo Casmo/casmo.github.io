@@ -32,8 +32,9 @@ class AppServiceProvider extends ServiceProvider
                 $avatar = imagecreatefrompng(resource_path('img/casmo.png'));
                     $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
 
+                $upscale = 2;
                 foreach ($pages as $page) {
-                    $image = imagecreatetruecolor(1200, 627);
+                    $image = imagecreatetruecolor(1200 * $upscale, 627 * $upscale);
                     $bgColor = imagecolorallocate($image, 31, 35, 41);
                     imagefill($image, 0, 0, $bgColor);
                     $textColor = imagecolorallocate($image, 255, 255, 255);
@@ -67,9 +68,9 @@ class AppServiceProvider extends ServiceProvider
                         $line2 = '';
                         $top = 335;
                     }
-                    imagettftext($image, $fontSize, 0, 160, $top, $textColor, $fontPath, $line1);
+                    imagettftext($image, $fontSize * $upscale, 0, 160 * $upscale, $top * $upscale, $textColor, $fontPath, $line1);
                     if ($line2) {
-                        imagettftext($image, $fontSize, 0, 160, $top+50, $textColor, $fontPath, $line2);
+                        imagettftext($image, $fontSize * $upscale, 0, 160 * $upscale, ($top+50) * $upscale, $textColor, $fontPath, $line2);
                     }
 
                     // Write date on top of title
@@ -77,16 +78,16 @@ class AppServiceProvider extends ServiceProvider
                     if ($date) {
                         $date = date('F j, Y', strtotime($date));
                         $textDateColor = imagecolorallocate($image, 159, 159, 169);
-                        imagettftext($image, 15, 0, 160, $top-$dateTop, $textDateColor, $fontPath, $date);
+                        imagettftext($image, 15 * $upscale, 0, 160 * $upscale, ($top-$dateTop) * $upscale, $textDateColor, $fontPath, $date);
                     }
 
                     $tags = join(', ', $page->get('categories') ?? []);
                     if ($tags) {
                         $categoryTextColor = imagecolorallocate($image, 124, 207, 0);
-                        imagettftext($image, 15, 0, 160, ($line2 ? $top+80 : $top+30), $categoryTextColor, $fontPath, $tags);
+                        imagettftext($image, 15 * $upscale, 0, 160 * $upscale, ($line2 ? $top+80 : $top+30) * $upscale, $categoryTextColor, $fontPath, $tags);
                     }
 
-                    imagecopy($image, $avatar, 50, 265, 0, 0, imagesx($avatar), imagesy($avatar));
+                    imagecopy($image, $avatar, 50 * $upscale, 265 * $upscale, 0, 0, imagesx($avatar), imagesy($avatar));
                     imagejpeg($image, base_path('storage/static/assets/pages/' . $page->slug . '.jpg'), 100);
                 }
         });
