@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
                     $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
 
                 foreach ($pages as $page) {
-                    $image = imagecreatetruecolor(1200, 630);
+                    $image = imagecreatetruecolor(1200, 627);
                     $bgColor = imagecolorallocate($image, 31, 35, 41);
                     imagefill($image, 0, 0, $bgColor);
                     $textColor = imagecolorallocate($image, 255, 255, 255);
