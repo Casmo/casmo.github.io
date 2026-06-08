@@ -19,9 +19,11 @@
 /public/hot
 /public/static
 /public/storage
+/public/assets/pages/
 /public/vendor/statamic
 /storage/*.key
 /storage/pail
+/storage/static
 /vendor
 _ide_helper.php
 Homestead.json

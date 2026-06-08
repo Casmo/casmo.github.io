@@ -1,8 +1,6 @@
 @extends('default')
 
 @section('body')
-
-
     <p>
       <span class="text-lime-500">{{ strtolower($author->name) }}@laptop:{{ $categories->first()?->title }}$</span> cat <strong>{{ $slug }}.txt</strong><br />
       <span class="text-lime-500">&gt; Title:</span> {{ $title }}</span><br />
@@ -15,7 +13,7 @@
 
   <statamic:collection:next in="blog" as="posts" limit="2" sort="date:asc">
     <!-- @if ($no_results)
-      <a href="/blog">/Blog</a>
+      <a href="/blog">/Blog</a>dfsdfdasfasdfadsafdsfdasasfadsfads
     @endif -->
 
     @foreach ($posts as $post)
