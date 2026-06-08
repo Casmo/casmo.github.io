@@ -19,7 +19,6 @@
 /public/hot
 /public/static
 /public/storage
-/public/assets/pages/
 /public/vendor/statamic
 /storage/*.key
 /storage/pail
