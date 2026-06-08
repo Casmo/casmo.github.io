@@ -87,9 +87,7 @@ class AppServiceProvider extends ServiceProvider
                     }
 
                     imagecopy($image, $avatar, 50, 265, 0, 0, imagesx($avatar), imagesy($avatar));
-                    imagepng($image, base_path('storage/static/assets/pages/' . $page->slug . '.png'));
-
-                    echo "Generated Open Graph image " . base_path('storage/static/assets/pages/' . $page->slug . '.png'). "\n";
+                    imagejpeg($image, base_path('storage/static/assets/pages/' . $page->slug . '.jpg'), 100);
                 }
         });
     }
