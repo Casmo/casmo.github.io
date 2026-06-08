@@ -88,7 +88,7 @@ class AppServiceProvider extends ServiceProvider
                     }
 
                     imagecopy($image, $avatar, 50 * $upscale, 265 * $upscale, 0, 0, imagesx($avatar), imagesy($avatar));
-                    imagejpeg($image, base_path('storage/static/assets/pages/' . $page->slug . '.jpg'), 100);
+                    imagepng($image, base_path('storage/static/assets/pages/' . $page->slug . '.png'), 100);
                 }
         });
     }
