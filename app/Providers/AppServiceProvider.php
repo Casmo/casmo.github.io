@@ -21,12 +21,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
         SSG::after(function () {
             // Get all public statamic pages
             $pages = Entry::query()
                 ->where('published', true)
                 ->get();
+            echo "Generating Open Graph images for " . $pages->count() . " pages...\n";
                 if (!is_dir(public_path('assets/pages'))) {
                     mkdir(public_path('assets/pages'), 0755, true);
                 }
@@ -89,6 +89,8 @@ class AppServiceProvider extends ServiceProvider
 
                     imagecopy($image, $avatar, 50, 265, 0, 0, imagesx($avatar), imagesy($avatar));
                     imagepng($image, public_path('assets/pages/' . $page->slug . '.png'));
+                    chmod(public_path('assets/pages/' . $page->slug . '.png'), 0644);
+                    echo "Generated Open Graph image " . public_path('assets/pages/' . $page->slug . '.png'). "\n";
                 }
         });
     }
