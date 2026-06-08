@@ -29,14 +29,28 @@ class AppServiceProvider extends ServiceProvider
                 if (!is_dir(config('statamic.ssg.output_path') . '/assets/pages')) {
                     mkdir(config('statamic.ssg.output_path') . '/assets/pages', 0755, true);
                 }
-                $avatar = imagecreatefrompng(resource_path('img/casmo.png'));
-                $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
 
-                $upscale = 2;
+                $upscale = 1;
+                $avatar = imagecreatefrompng(resource_path('img/casmo.png'));
+                // Resize avatar to 200x200
+                $avatarResized = imagecreatetruecolor(100 * $upscale, 100 * $upscale);
+                imagealphablending($avatarResized, false);
+                imagesavealpha($avatarResized, true);
+                imagecopyresampled($avatarResized, $avatar, 0, 0, 0, 0, 100 * $upscale, 100 * $upscale, imagesx($avatar), imagesy($avatar));
+                $background = imagecreatefrompng(resource_path('img/og-background.png'));
+                // Resize background to 1200x630
+                $backgroundResized = imagecreatetruecolor(1200 * $upscale, 630 * $upscale);
+                imagealphablending($backgroundResized, false);
+                imagesavealpha($backgroundResized, true);
+                imagecopyresampled($backgroundResized, $background, 0, 0, 0, 0, 1200 * $upscale, 630 * $upscale, imagesx($background), imagesy($background));
+
+                $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
                 foreach ($pages as $page) {
-                    $image = imagecreatetruecolor(1200 * $upscale, 627 * $upscale);
+                    $image = imagecreatetruecolor(1200 * $upscale, 630 * $upscale);
                     $bgColor = imagecolorallocate($image, 31, 35, 41);
                     imagefill($image, 0, 0, $bgColor);
+                    imagecopy($image, $backgroundResized, 0, 0, 0, 0, imagesx($background), imagesy($background));
+                    imagecopy($image, $avatarResized, 50, 265 * $upscale, 0, 0, imagesx($avatarResized), imagesy($avatarResized));
                     $textColor = imagecolorallocate($image, 255, 255, 255);
                     
                     $fontSize = 40;
@@ -87,7 +101,6 @@ class AppServiceProvider extends ServiceProvider
                         imagettftext($image, 15 * $upscale, 0, 160 * $upscale, ($line2 ? $top+80 : $top+30) * $upscale, $categoryTextColor, $fontPath, $tags);
                     }
 
-                    imagecopy($image, $avatar, 50 * $upscale, 265 * $upscale, 0, 0, imagesx($avatar), imagesy($avatar));
                     imagepng($image, config('statamic.ssg.output_path') . '/assets/pages/' . $page->slug . '.png');
                 }
         });
