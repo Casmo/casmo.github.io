@@ -1,5 +1,5 @@
 @extends('default')
 
 @section('body')
-  {!! $content !!}
+  @content($content)
 @endsection

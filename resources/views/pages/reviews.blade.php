@@ -1,7 +1,7 @@
 @extends('default')
 
 @section('body')
-  {!! $content !!}
+  @content($content)
 
   <div class="my-8">
     <s:collection:games limit="10" sort="date:desc" paginate="true" as="reviews">

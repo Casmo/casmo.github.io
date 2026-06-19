@@ -7,7 +7,7 @@
         <title>{{ $page->title ?? $site->title }}</title>
         @vite(['resources/css/site.css', 'resources/js/site.js'])
         <meta property="og:title" content="{{ $page->title ?? $site->title }}">
-        <meta property="og:description" content="{{ $page->description ?? $site->description ?? preg_replace('/\s+/', ' ', strip_tags($page->content)) ?? '' }}">
+        <meta property="og:description" content="{{ $page->description ?? $site->description ?? preg_replace('/\s+/', ' ', strip_tags(\App\Support\Palette::render((string) $page->content))) ?? '' }}">
         <meta property="og:image" content="{{ $page->image ?? $site->image ?? 'https://mathieuderuiter.nl/assets/pages/' . ($page->slug ?? $site->slug) . '.png' }}">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
