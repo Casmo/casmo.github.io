@@ -1,4 +1,4 @@
-title: Game
+title: Game review
 tabs:
   main:
     display: Main
@@ -10,13 +10,58 @@ tabs:
             field:
               type: text
               required: true
+              display: Review title
+              instructions: 'Headline for the review (e.g. "Hollow Cult — a masterclass in restraint")'
+              validate:
+                - required
           -
             handle: name
             field:
               type: text
+              display: Game name
+              instructions: 'The game being reviewed'
               validate:
                 - required
-              display: Name
+          -
+            handle: developer
+            field:
+              type: text
+              display: Developer
+          -
+            handle: release_date
+            field:
+              type: date
+              display: Release date
+              instructions: 'When the game launched (not your review date)'
+          -
+            handle: platforms
+            field:
+              type: select
+              display: Platforms
+              multiple: true
+              taggable: true
+              clearable: true
+              options:
+                - PC
+                - Steam Deck
+                - Switch
+                - PS5
+                - Xbox
+                - itch.io
+                - Mobile
+          -
+            handle: store_url
+            field:
+              type: text
+              input_type: url
+              display: Store URL
+              instructions: 'Steam / itch.io / store link'
+          -
+            handle: playtime
+            field:
+              type: text
+              display: Playtime
+              instructions: 'How long you played, free text (e.g. "~12h")'
           -
             handle: capsule
             field:
@@ -24,20 +69,59 @@ tabs:
               max_files: 1
               type: assets
               display: Capsule
-              instructions: 'Steam main capsule image: 1232x 706px'
+              instructions: 'Steam main capsule image: 1232x706px'
               instructions_position: below
+          -
+            handle: rating
+            field:
+              type: float
+              display: Rating (out of 10)
+              instructions: '0 to 10, one decimal allowed'
+          -
+            handle: verdict
+            field:
+              type: text
+              display: Verdict
+              instructions: 'One-line TL;DR, shown on the index'
+          -
+            handle: designers_takeaway
+            field:
+              type: textarea
+              display: "Designer's takeaway"
+              instructions: 'The single design lesson this game teaches (pull-quote)'
+          -
+            handle: what_id_steal
+            field:
+              type: markdown
+              display: "What I'd steal"
+              instructions: 'The mechanic or idea you would lift into your own work'
+          -
+            handle: books
+            field:
+              type: terms
+              taxonomies:
+                - books
+              display: Influences (books)
+              mode: select
+              create: true
+              instructions: 'Books on game design / art that shaped this critique'
           -
             handle: content
             field:
               type: markdown
-              display: Content
+              display: Review
               localizable: true
-          -
-            handle: template
-            field:
-              type: template
-              display: Template
-              localizable: true
+              buttons:
+                - bold
+                - italic
+                - unorderedlist
+                - orderedlist
+                - quote
+                - link
+                - image
+                - table
+                - asset
+                - code
   sidebar:
     display: Sidebar
     sections:
@@ -49,3 +133,11 @@ tabs:
               type: slug
               localizable: true
               validate: 'max:200'
+          -
+            handle: date
+            field:
+              type: date
+              required: true
+              default: now
+              validate:
+                - required

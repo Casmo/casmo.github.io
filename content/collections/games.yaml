@@ -1,12 +1,16 @@
-title: Games
+title: Reviews
 icon: collections
-template: default
+template: games
 layout: layout
 revisions: false
-sort_dir: asc
+route: '/reviews/{slug}'
+date: true
+sort_dir: desc
+taxonomies:
+  - books
 date_behavior:
-  past: null
-  future: null
+  past: public
+  future: private
 preview_targets:
   -
     label: Entry

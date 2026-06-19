@@ -1,0 +1,45 @@
+title: Book
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              display: Title
+              validate:
+                - required
+          -
+            handle: author
+            field:
+              type: text
+              display: Author
+          -
+            handle: cover
+            field:
+              container: assets
+              max_files: 1
+              type: assets
+              display: Cover
+          -
+            handle: link
+            field:
+              type: text
+              input_type: url
+              display: Link
+              instructions: 'Where to find the book'
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'

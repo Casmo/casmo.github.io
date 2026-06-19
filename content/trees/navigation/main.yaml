@@ -8,6 +8,10 @@ tree:
     entry: 44b7c402-2873-4f76-b863-99480848dc61
     title: /Blog
   -
+    id: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+    entry: 7c9e6f10-2b4a-4d3e-9f1a-8b2c3d4e5f60
+    title: /Reviews
+  -
     id: 68b1ec9e-2091-4c50-8b13-b3e93ce9b0cf
     entry: 6b218b47-21d3-45d1-a05d-a98610c5555d
     title: /Resources

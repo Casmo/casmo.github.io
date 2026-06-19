@@ -9,3 +9,5 @@ preferences:
     blog:
       view: list
       after_save: continue_editing
+    games:
+      view: list
