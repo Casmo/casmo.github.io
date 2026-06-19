@@ -1,7 +1,7 @@
 @extends('default')
 
 @section('body')
-  {!! $content !!}
+  @content($content)
 
   <div class="my-8">
     <s:collection:blog limit="3" sort="date:desc" paginate="true" as="posts">
@@ -11,7 +11,7 @@
           <p>
             <span class="text-lime-500">&gt; Title:</span> {{ $post->title }}</span><br />
             <span class="text-lime-500">&gt; Date:</span> {{ $post->date->format('F j, Y') }}</span><br />
-            <span class="text-lime-500">&gt; Excerpt:</span> {{ Str::limit(strip_tags($post->content), 150) }}</span><br />
+            <span class="text-lime-500">&gt; Excerpt:</span> {{ Str::limit(strip_tags(\App\Support\Palette::render((string) $post->content)), 150) }}</span><br />
             <a href="{{ $post->url }}">Read more</a>
           </p>
         </div>

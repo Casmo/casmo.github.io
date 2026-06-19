@@ -8,7 +8,7 @@
       <span class="text-lime-500">&gt; Tags:</span> {{ $categories->pluck('title')->join(', ') }}<br />
     </p>
   <div>
-    {!! $content !!}
+    @content($content)
   </div>
 
   <statamic:collection:next in="blog" as="posts" limit="2" sort="date:asc">

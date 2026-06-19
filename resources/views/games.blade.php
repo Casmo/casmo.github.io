@@ -55,7 +55,7 @@
   @endif
 
   <div>
-    {!! $content !!}
+    @content($content)
   </div>
 
   @if($takeaway)
