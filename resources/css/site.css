@@ -88,6 +88,7 @@
 
 @layer components {
   .palette {
+    width: fit-content;
     margin: 1.5rem 0;
     max-width: 100%;
   }
@@ -105,8 +106,8 @@
   }
 
   .palette__swatch {
-    flex: 1 1 64px;
-    min-width: 64px;
+    flex: 1 1 0;
+    min-width: 0;
     border: 1px solid #1f2329;
   }
 
