@@ -68,6 +68,22 @@
   p {
     @apply mb-4;
   }
+
+  img {
+    max-width: 616px;
+  }
+
+  @media (max-width: 639px) {
+    img {
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 640px) and (max-width: 767px) {
+    img {
+      max-width: 100%;
+    }
+  }
 }
 
 @keyframes writing-cursor {
@@ -89,13 +105,12 @@
 @layer components {
   .palette {
     width: fit-content;
-    margin: 1.5rem 0;
+    margin: 0;
     max-width: 100%;
   }
 
   .palette__img {
     display: block;
-    max-width: 100%;
     max-height: 400px;
   }
 
