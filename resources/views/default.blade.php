@@ -14,7 +14,7 @@
         <meta property="og:url" content="https://mathieuderuiter.nl{{ $page->url ?? $site->url }}">
         <meta name="author" content="Mathieu de Ruiter">
     </head>
-    <body class="bg-[#1f2329] leading-normal dark:text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <body class="bg-[#1f2329] leading-normal dark:text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
         <div class="py-8">
             <statamic:nav:main>
                 <a class="text-lg text-lime-500 hover:text-lime-400" href="{{ $url }}">{{ $title }}</a>

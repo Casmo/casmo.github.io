@@ -8,10 +8,10 @@
 
       @foreach($reviews as $review)
         @php($cover = is_iterable($review->capsule ?? null) ? collect($review->capsule)->first() : ($review->capsule ?? null))
-        <div class="mb-8 sm:flex sm:gap-4">
+        <div class="mb-8">
           @if($cover)
             <a href="{{ $review->url }}" class="shrink-0">
-              <img src="{{ $cover->url() }}" alt="{{ $review->name }}" class="w-full sm:w-48 rounded border border-zinc-700" />
+              <img src="{{ $cover->url() }}" alt="{{ $review->name }}" />
             </a>
           @endif
           <p>
