@@ -26,7 +26,7 @@
 
 @section('body')
   <p>
-    <strong>mathieu@laptop:~/reviews$</strong> cat <strong>{{ $slug }}.review</strong><br />
+    <strong>mathieu@laptop:~/reviews$</strong> cat <strong>{{ $slug }}.txt</strong><br />
 
   @if($cover)
       <img src="{{ $cover->url() }}" alt="{{ $gameName }}" class="max-w-full" />
