@@ -5,4 +5,4 @@ title: Reviews
 template: pages/reviews
 ---
 **mathieu@laptop:~/Reviews$** cat reviews.txt
-Weekly indie game reviews, through the lens of a wannabe game designer & developer.
+Once in a while indie game reviews, through the lens of a wannabe game designer & developer.
