@@ -1,6 +1,6 @@
 ---
 name: rewrite
-description: Tighten and copyedit a draft post for casmo.github.io in Mathieu's voice. Cut fluff, fix grammar and flow, preserve the author's wording and structure. Use when asked to rewrite, copyedit, tighten, polish, or proofread a blog/game/page entry under content/collections/, or when a draft needs a light editorial pass before publishing.
+description: Tighten and copyedit a draft post for casmo.github.io in Mathieu's voice. Fix grammar and flow, preserve the author's wording and structure. Use when asked to rewrite, copyedit, tighten, polish, or proofread a blog/game/page entry under content/collections/, or when a draft needs a light editorial pass before publishing.
 ---
 
 # Rewrite (casmo.github.io)
