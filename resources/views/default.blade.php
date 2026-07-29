@@ -25,7 +25,7 @@ text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
         @yield('body')
 
         <div class="flex items-center text-sm text-white">
-            <img src="https://mathieuderuiter.nl/assets/knowledge/quake-1-pixel-logo.png" class="mr-2" height="16px" style="image-rendering: crisp-edges;" /> Quake 1 was released on July 22, 1994.
+            <img src="https://mathieuderuiter.nl/assets/knowledge/quake-1-pixel-logo.png" class="mr-2" height="16 style="image-rendering: crisp-edges;" /> Quake 1 was released on July 22, 1994.
         </div>
     </body>
 </html>
