@@ -5,6 +5,14 @@
 @source "../../content";
 
 @font-face {
+  font-family: "monogram";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/monogram.ttf") format("truetype");
+}
+
+@font-face {
   font-family: "SpaceMono";
   font-weight: 400;
   font-style: normal;
@@ -67,6 +75,12 @@
   }
   p {
     @apply mb-4;
+  }
+
+  .knowledge {
+      font-family: monogram;
+      font-size: 10px;
+      line-height: 16px;
   }
 
   img {
