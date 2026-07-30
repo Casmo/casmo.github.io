@@ -27,5 +27,8 @@ text-zinc-400 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
         <div class="flex items-center knowledge text-white">
             <img src="https://mathieuderuiter.nl/assets/knowledge/quake-1-pixel-logo.png" class="mr-2" height="11" width="11" style="image-rendering: pixelated;" /> Quake 1 was released on July 22, 1994.
         </div>
+        <div class="flex items-center knowledge text-white">
+            <img src="https://mathieuderuiter.nl/assets/knowledge/commander-keen-1bit-flag.png" class="mr-2" height="14" width="10" style="image-rendering: pixelated;" /> Commander keen was first released on December 14, 1990.
+        </div>
     </body>
 </html>
