@@ -81,6 +81,7 @@
       font-family: monogram;
       font-size: 16px;
       font-smooth: never;
+      line-height: 12px;
       -webkit-font-smoothing: none;
   }
 
