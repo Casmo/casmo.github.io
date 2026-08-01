@@ -11,3 +11,5 @@ preferences:
       after_save: continue_editing
     games:
       view: list
+    trivia:
+      view: list
