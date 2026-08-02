@@ -160,4 +160,41 @@
     font-size: 0.75rem;
     color: #9f9fa9;
   }
+
+  /* Dungeon footer: a tile grid cut from /assets/tilemap.png (20 x 20 tiles of 16px, 1px apart). */
+  .dungeon {
+    /* Integer zoom, so 2 = 32px tiles. Same size on every screen: wider screens
+       show more tiles, they are never scaled up. */
+    --dungeon-scale: 2;
+    --dungeon-tile: calc(16px * var(--dungeon-scale));
+    --dungeon-color: #3f4650;
+
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    /* break out of the centered max-w-2xl body, edge to edge */
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  .dungeon__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--dungeon-columns, 20), var(--dungeon-tile));
+    grid-auto-rows: var(--dungeon-tile);
+    flex: none; /* never shrink: overflow gets cropped evenly on both sides */
+  }
+
+  .dungeon__tile {
+    display: block;
+    background-color: var(--tile-color, var(--dungeon-color));
+    image-rendering: pixelated;
+    -webkit-mask-image: url("/assets/tilemap.png");
+    mask-image: url("/assets/tilemap.png");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: calc(339px * var(--dungeon-scale)) calc(339px * var(--dungeon-scale));
+    mask-size: calc(339px * var(--dungeon-scale)) calc(339px * var(--dungeon-scale));
+    -webkit-mask-position: calc(var(--tile-x) * -17px * var(--dungeon-scale)) calc(var(--tile-y) * -17px * var(--dungeon-scale));
+    mask-position: calc(var(--tile-x) * -17px * var(--dungeon-scale)) calc(var(--tile-y) * -17px * var(--dungeon-scale));
+  }
 }
