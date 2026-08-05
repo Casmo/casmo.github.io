@@ -348,6 +348,23 @@ pre code.hljs {
   }
 }
 
+/*
+| Index pagination: the two links sit at the two ends of the list they page
+| through, instead of huddling together in the middle.
+*/
+@layer components {
+  .pagination {
+    display: flex;
+    line-height: var(--cell);
+  }
+
+  /* An auto margin rather than space-between, so a lone "Next" -- page one, where
+     there is no "Previous" -- still ends up on the right. */
+  .pagination__next {
+    margin-left: auto;
+  }
+}
+
 /* Nav rendered as `ls` output. Directories, so they get a trailing slash. */
 @layer components {
   .listing {

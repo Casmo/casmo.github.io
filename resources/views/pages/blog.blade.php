@@ -31,11 +31,11 @@
       @if($paginate)
           <div class="pagination">
               @if($paginate['prev_page'])
-                  <a href="{{ $paginate['prev_page'] }}">Previous</a>
+                  <a class="pagination__prev" href="{{ $paginate['prev_page'] }}">Previous</a>
               @endif
 
               @if($paginate['next_page'])
-                  <a href="{{ $paginate['next_page'] }}">Next</a>
+                  <a class="pagination__next" href="{{ $paginate['next_page'] }}">Next</a>
               @endif
           </div>
       @endif

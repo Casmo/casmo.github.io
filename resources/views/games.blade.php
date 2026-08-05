@@ -91,15 +91,19 @@
     </p>
   @endif
 
+  {{-- The tag pair still renders on the last review, so the marker is gated on
+       the list rather than on the tag: no follow-up, no "// up next". --}}
   <statamic:collection:next in="games" as="entries" limit="2" sort="date:desc">
 
-    <x-terminal.section label="up next">
-      @foreach ($entries as $entry)
-        <div class="post">
-          <a href="{{ $entry->url }}">{{ $entry->name ?? $entry->title }}</a>
-        </div>
-      @endforeach
-    </x-terminal.section>
+    @if (filled($entries))
+      <x-terminal.section label="up next">
+        @foreach ($entries as $entry)
+          <div class="post">
+            <a href="{{ $entry->url }}">{{ $entry->name ?? $entry->title }}</a>
+          </div>
+        @endforeach
+      </x-terminal.section>
+    @endif
 
   </statamic:collection:next>
 @endsection
