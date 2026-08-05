@@ -48,7 +48,9 @@ class AppServiceProvider extends ServiceProvider
             imagesavealpha($backgroundResized, true);
             imagecopyresampled($backgroundResized, $background, 0, 0, 0, 0, 1200 * $upscale, 630 * $upscale, imagesx($background), imagesy($background));
 
-            $fontPath = resource_path('fonts/SpaceMono-Regular.ttf');
+            // GD needs a TTF, so this is the one place the site keeps one: the
+            // woff2 files the browser loads are unreadable by imagettftext().
+            $fontPath = resource_path('fonts/IBMPlexMono-Regular.ttf');
             foreach ($pages as $page) {
                 $image = imagecreatetruecolor(1200 * $upscale, 630 * $upscale);
                 $bgColor = imagecolorallocate($image, 31, 35, 41);

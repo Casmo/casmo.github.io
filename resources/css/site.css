@@ -4,101 +4,176 @@
 @source "../views";
 @source "../../content";
 
+/*
+| The site is dressed as one shell session: nav is `ls`, each page is a file
+| being `cat`, the footer runs `fortune`. Two rules keep that from becoming a
+| costume:
+|
+|   1. Chrome vs prose. Prompts, readouts and the footer are "chrome" and carry
+|      the CRT treatment. Article body text never does, so long reads stay clean.
+|   2. One accent. --accent is the only hue in the interface. Three things sit
+|      outside it: the dungeon footer (artwork, --accent-dim), the 1-bit trivia
+|      icons and code blocks (Atom One Dark's palette), which are quoted
+|      material rather than interface.
+*/
+
 @font-face {
-  font-family: "monogram";
+  font-family: "IBMPlexMono";
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  src: url("../fonts/monogram.ttf") format("truetype");
+  src: url("../fonts/IBMPlexMono-Regular.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "SpaceMono";
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  src: url("../fonts/SpaceMono-Regular.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "SpaceMono";
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  src: url("../fonts/SpaceMono-Bold.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "SpaceMono";
+  font-family: "IBMPlexMono";
   font-weight: 400;
   font-style: italic;
   font-display: swap;
-  src: url("../fonts/SpaceMono-Italic.ttf") format("truetype");
+  src: url("../fonts/IBMPlexMono-Italic.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "SpaceMono";
+  font-family: "IBMPlexMono";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/IBMPlexMono-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBMPlexMono";
   font-weight: 700;
   font-style: italic;
   font-display: swap;
-  src: url("../fonts/SpaceMono-BoldItalic.ttf") format("truetype");
+  src: url("../fonts/IBMPlexMono-BoldItalic.woff2") format("woff2");
+}
+
+@theme {
+  --font-mono-stack: "IBMPlexMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 @layer theme {
   :root {
-    --font-sans: "SpaceMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --default-mono-font-family: "SpaceMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-sans: var(--font-mono-stack);
+    --default-mono-font-family: var(--font-mono-stack);
+
+    --bg: #1f2329;
+    --fg: #a1a1aa;
+    --muted: #6b7280;
+    --rule: #3f4650;
+    --accent: #84cc16;
+    --accent-dim: #5a7a2e;
+
+    /*
+    | One character cell, the way a real terminal has one. Every line-height and
+    | vertical margin below is a whole multiple of this, so nothing drifts
+    | off-grid. 1.75rem at 16px is also the leading monospace prose wants;
+    | Tailwind's 1.5 was too tight to read a long post in.
+    */
+    --cell: 1.75rem;
   }
 }
 
 @layer base {
   body {
-    font-family: var(--font-sans, "SpaceMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-family: var(--font-mono-stack);
+    font-size: 1rem;
+    line-height: var(--cell);
   }
-  
+
   a {
-    @apply text-sky-500;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
-  
+
   a:hover {
-    @apply text-sky-400;
+    color: color-mix(in srgb, var(--accent) 80%, white);
   }
 
   h2 {
-    @apply text-2xl font-bold mb-4 mt-8;
+    @apply text-2xl font-bold;
+    @apply mt-2;
   }
+
   h3 {
-    @apply text-xl font-bold mb-4 mt-6;
+    @apply text-xl font-bold;
+    @apply mt-2;
   }
-  ul {
-    @apply list-disc list-inside mb-4;
-  }
+
   p {
     @apply mb-4;
   }
 
-  .knowledge {
-      font-family: monogram;
-      font-size: 16px;
-      font-smooth: never;
-      line-height: 12px;
-      -webkit-font-smoothing: none;
+  ul {
+    @apply list-disc list-inside;
+    @apply mb-4;
+  }
+
+  blockquote {
+    border-left: 1px solid var(--accent-dim);
+    padding-left: 1.5ch;
+    margin-block: var(--cell);
   }
 
   img {
     max-width: 616px;
   }
 
-  @media (max-width: 639px) {
+  @media (max-width: 767px) {
     img {
       max-width: 100%;
     }
   }
+}
 
-  @media (min-width: 640px) and (max-width: 767px) {
-    img {
-      max-width: 100%;
-    }
+/*
+| Code blocks belong to Atom One Dark, imported above. It ships its own background,
+| padding and layout for `pre code.hljs`, so nothing here frames or textures them --
+| a border or scanlines would only draw a second box around the theme's own. Code is
+| therefore the one region that keeps a palette of its own, the way the artwork does.
+|
+| Only the outer margin is set, because Tailwind's preflight zeroes it.
+*/
+@layer base {
+  pre {
+    margin-bottom: var(--cell);
+  }
+
+  /* Inline code only -- highlight.js never touches it, so it follows the accent. */
+  :not(pre) > code {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--rule) 35%, transparent);
+    padding: 0 0.5ch;
+  }
+}
+
+/*
+| CRT treatment. Scanlines are a pseudo-element so they can never intercept a
+| click, and they are only ever applied to chrome -- never to a paragraph.
+*/
+@layer utilities {
+  .scanlines {
+    position: relative;
+  }
+
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0.3) 0 1px,
+      transparent 1px 3px
+    );
+  }
+
+  /* Phosphor bloom. Static, not animated: it sits behind every prompt on the
+     site and a pulsing one would be unbearable. */
+  .glow {
+    text-shadow: 0 0 0.4em color-mix(in srgb, var(--accent) 45%, transparent);
   }
 }
 
@@ -115,6 +190,210 @@
 @layer utilities {
   .writing-cursor {
     animation: writing-cursor 1s infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .writing-cursor {
+      animation: none;
+    }
+  }
+}
+
+/*
+| Chrome comes in two continuous panels -- one at the top holding the nav and the
+| page header, one at the bottom holding the fortune -- rather than a scanlined
+| strip per prompt. Alternating textured and plain bands every few lines read as
+| flicker; two panels give the page one transition into the prose and one out.
+*/
+@layer components {
+  /* The reading column. Panels run edge to edge; their contents line up with the
+     prose inside this. */
+  .shell {
+    max-width: 42rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .shell {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .shell {
+      padding-inline: 2rem;
+    }
+  }
+
+  .panel {
+    padding-block: var(--cell);
+    margin-bottom: calc(var(--cell) * 1);
+    border-bottom: 1px solid var(--rule);
+  }
+}
+
+/*
+| Prompt: "mathieu@laptop:~/blog$ cat scorched-earth.txt". Appears exactly three
+| times per page (nav, header, fortune) so the three read as one session.
+*/
+@layer components {
+  /* No inset of its own: chrome starts on the same left edge as the prose. */
+  .prompt {
+    margin-bottom: 0;
+    line-height: var(--cell);
+    overflow-wrap: anywhere;
+  }
+
+  .prompt__host,
+  .prompt__sigil {
+    color: var(--accent);
+  }
+
+  .prompt__path {
+    color: var(--fg);
+  }
+
+  .prompt__command {
+    color: var(--fg);
+  }
+}
+
+/*
+| Readout: dot-leader rows for short single-line data. The label cell is a fixed
+| character width and its dots are clipped to that width, which is what puts
+| every value in the same column. Anything multi-line uses a section marker
+| instead -- a leader dotting across to a paragraph looks broken, not retro.
+*/
+@layer components {
+  /* Sits directly under its prompt inside the panel, one blank cell below the nav. */
+  .terminal-header {
+    margin-top: var(--cell);
+  }
+
+  /* No margin of its own: whatever contains it decides the spacing. */
+  .readout {
+    display: grid;
+    grid-template-columns: 11ch 1fr;
+    column-gap: 1ch;
+    margin-block: 0;
+  }
+
+  @media (min-width: 40rem) {
+    .readout {
+      grid-template-columns: 13ch 1fr;
+    }
+  }
+
+  .readout__label {
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--accent);
+    line-height: var(--cell);
+  }
+
+  .readout__label::after {
+    content: " ........................";
+    color: var(--rule);
+  }
+
+  .readout__value {
+    color: var(--fg);
+    line-height: var(--cell);
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Section marker: heads a block or a list. Replaces the old `>` prefix, which
+   is retired site-wide. */
+@layer components {
+  .section-marker {
+    color: var(--accent-dim);
+    margin-bottom: 0;
+    line-height: var(--cell);
+  }
+}
+
+/*
+| One item in an index listing. Every child sits flush on the cell grid so a page
+| of ten reviews reads as one list -- left to their own margins the cover, the
+| readout, the verdict and the link each add a gap, and every entry ends up
+| looking like a separate document.
+*/
+@layer components {
+  .entry {
+    margin-bottom: calc(var(--cell) * 1.5);
+  }
+
+  .entry > p,
+  .entry > .readout {
+    margin-block: 0;
+  }
+
+  /* Block, so the inline descender gap does not add a phantom row under a cover. */
+  .entry img {
+    display: block;
+    margin-bottom: calc(var(--cell) / 2);
+  }
+}
+
+/* Nav rendered as `ls` output. Directories, so they get a trailing slash. */
+@layer components {
+  .listing {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 3ch;
+    margin-bottom: 0;
+    list-style: none;
+  }
+
+  .listing__item {
+    line-height: var(--cell);
+  }
+
+  .listing__item a {
+    text-decoration: none;
+  }
+
+  .listing__item a:hover {
+    text-decoration: underline;
+  }
+
+  /* The directory you are standing in, marked up as aria-current so the state
+     lives in one place for both screen readers and the eye. */
+  .listing__item a[aria-current="page"] {
+    color: color-mix(in srgb, var(--accent) 75%, white);
+    font-weight: 700;
+    text-shadow: 0 0 0.4em color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+}
+
+/* Fortune: the random trivia line. `fortune` is the Unix program that printed a
+   random quip at the end of a login, which is exactly what this is. */
+@layer components {
+  /* Left aligned on the same column as the nav and the prose -- it is the third
+     prompt of the session, not a caption. */
+  .fortune {
+    padding-block: var(--cell);
+  }
+
+  .fortune__line {
+    margin-bottom: 0;
+    color: var(--fg);
+    line-height: var(--cell);
+  }
+
+  /* Left exactly as authored: 1-bit art at its native size, untinted, with
+     nearest-neighbour scaling. These are artefacts of the games they came from
+     rather than palette decoration, and are the one thing on the page
+     deliberately exempt from the single-accent rule.
+
+     Inline rather than a flex item, so it stays next to the first word when a
+     long fortune wraps instead of drifting off on its own. */
+  .fortune__icon {
+    display: inline;
+    vertical-align: middle;
+    image-rendering: pixelated;
   }
 }
 
@@ -139,7 +418,7 @@
   .palette__swatch {
     flex: 1 1 0;
     min-width: 0;
-    border: 1px solid #1f2329;
+    border: 1px solid var(--bg);
   }
 
   .palette__color {
@@ -153,13 +432,13 @@
     font-size: 0.75rem;
     line-height: 1.2;
     text-align: center;
-    color: #9f9fa9;
+    color: var(--fg);
   }
 
   .palette__caption {
     margin-top: 0.5rem;
     font-size: 0.75rem;
-    color: #9f9fa9;
+    color: var(--fg);
   }
 
   /* Dungeon footer: a tile grid cut from /assets/tilemap.png (20 x 20 tiles of 16px, 1px apart). */
@@ -168,7 +447,7 @@
        show more tiles, they are never scaled up. */
     --dungeon-scale: 2;
     --dungeon-tile: calc(16px * var(--dungeon-scale));
-    --dungeon-color: #3f4650;
+    --dungeon-color: var(--rule);
 
     display: flex;
     justify-content: center;

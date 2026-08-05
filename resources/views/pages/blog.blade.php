@@ -1,19 +1,30 @@
 @extends('default')
 
+@section('terminal-header')
+  <x-terminal.header
+    :path="\App\Support\Terminal::path($terminal_path ?? null, [$title])"
+    :file="\App\Support\Terminal::file($terminal_file ?? null, $slug)"
+  />
+@endsection
+
 @section('body')
   @content($content)
 
-  <div class="my-8">
+  {{-- No prompt of its own: the listing belongs to the `cat` in the panel above,
+       and a fourth prompt per page would tip the session into a gag. --}}
+  <div>
     <s:collection:blog limit="3" sort="date:desc" paginate="true" as="posts">
 
       @foreach($posts as $post)
-        <div class="mb-8">
-          <p>
-            <span class="text-lime-500">&gt; Title:</span> {{ $post->title }}</span><br />
-            <span class="text-lime-500">&gt; Date:</span> {{ $post->date->format('F j, Y') }}</span><br />
-            <span class="text-lime-500">&gt; Excerpt:</span> {{ Str::limit(strip_tags(\App\Support\Palette::render((string) $post->content)), 150) }}</span><br />
-            <a href="{{ $post->url }}">Read more</a>
-          </p>
+        <div class="entry">
+          <x-terminal.readout :rows="[
+            'Title' => $post->title,
+            'Date' => $post->date->format('F j, Y'),
+          ]" />
+
+          <p>{{ Str::limit(strip_tags(\App\Support\Palette::render((string) $post->content)), 150) }}</p>
+
+          <p><a href="{{ $post->url }}">Read more</a></p>
         </div>
       @endforeach
 

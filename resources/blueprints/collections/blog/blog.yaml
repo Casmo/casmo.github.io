@@ -62,3 +62,15 @@ tabs:
               default: now
               validate:
                 - required
+          -
+            handle: terminal_path
+            field:
+              type: text
+              display: 'Terminal path'
+              instructions: 'Optional. Overrides the prompt path, which defaults to ~/blog/{category}.'
+          -
+            handle: terminal_file
+            field:
+              type: text
+              display: 'Terminal filename'
+              instructions: 'Optional. Overrides the file being cat''d, which defaults to the slug.'

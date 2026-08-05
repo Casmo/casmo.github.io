@@ -5,6 +5,5 @@ title: Blog
 updated_by: 3ab86282-d8ca-45a1-bff1-07230cbc2c23
 updated_at: 1780934476
 template: pages/blog
+terminal_file: notes.txt
 ---
-**mathieu@laptop:~/Content$** cat notes.txt
-Thoughts about games, techniques and inspiration.

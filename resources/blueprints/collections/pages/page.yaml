@@ -36,3 +36,15 @@ tabs:
               type: slug
               localizable: true
               validate: 'max:200'
+          -
+            handle: terminal_path
+            field:
+              type: text
+              display: 'Terminal path'
+              instructions: 'Optional. Overrides the prompt path, which defaults to the page title (About -> ~/about).'
+          -
+            handle: terminal_file
+            field:
+              type: text
+              display: 'Terminal filename'
+              instructions: 'Optional. Overrides the file being cat''d, which defaults to the slug (e.g. introduction.txt).'

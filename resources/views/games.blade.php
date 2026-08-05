@@ -24,34 +24,33 @@
     $cover = is_iterable($cover) ? collect($cover)->first() : $cover;
 @endphp
 
+@section('terminal-header')
+  <x-terminal.header
+    :path="\App\Support\Terminal::path($terminal_path ?? null, ['reviews'])"
+    :file="\App\Support\Terminal::file($terminal_file ?? null, $slug)"
+    :rows="[
+      'Game' => $gameName,
+      'Developer' => $dev,
+      'Released' => $rel?->format('F j, Y'),
+      'Platforms' => $platforms_->join(', '),
+      'Playtime' => $play,
+      'Rating' => $rate ? $rate.'/10' : null,
+      'Reviewed' => $date->format('F j, Y'),
+    ]"
+  />
+@endsection
+
 @section('body')
-  <p>
-    <strong>mathieu@laptop:~/reviews$</strong> cat <strong>{{ $slug }}.txt</strong><br />
-
   @if($cover)
-      <img src="{{ $cover->url() }}" alt="{{ $gameName }}" class="max-w-full" />
+    <img src="{{ $cover->url() }}" alt="{{ $gameName }}" class="max-w-full" />
   @endif
-    <span class="text-lime-500">&gt; Game:</span> {{ $gameName }}<br />
-    @if($dev)
-      <span class="text-lime-500">&gt; Developer:</span> {{ $dev }}<br />
-    @endif
-    @if($rel)
-      <span class="text-lime-500">&gt; Released:</span> {{ $rel->format('F j, Y') }}<br />
-    @endif
-    @if($platforms_->isNotEmpty())
-      <span class="text-lime-500">&gt; Platforms:</span> {{ $platforms_->join(', ') }}<br />
-    @endif
-    @if($play)
-      <span class="text-lime-500">&gt; Playtime:</span> {{ $play }}<br />
-    @endif
-    @if($rate)
-      <span class="text-lime-500">&gt; Rating:</span> {{ $rate }}/10<br />
-    @endif
-    <span class="text-lime-500">&gt; Reviewed:</span> {{ $date->format('F j, Y') }}<br />
-  </p>
 
+  {{-- Verdict is one line, but it is prose rather than data, so it takes a
+       section marker instead of a leader row. --}}
   @if($verdict_)
-    <p class="my-4"><span class="text-lime-500">&gt; Verdict:</span> {{ $verdict_ }}</p>
+    <x-terminal.section label="verdict">
+      <p>{{ $verdict_ }}</p>
+    </x-terminal.section>
   @endif
 
   <div>
@@ -59,50 +58,48 @@
   </div>
 
   @if($takeaway)
-    <blockquote class="border-l-2 border-lime-500 pl-4 my-6 italic">
-      <p><span class="text-lime-500">// designer's takeaway</span><br />
-      {{ $takeaway }}
-      </p>
-    </blockquote>
+    <x-terminal.section label="designer's takeaway">
+        <p>{{ $takeaway }}</p>
+    </x-terminal.section>
   @endif
 
   @if($steal)
-      <p>
-        <span class="text-lime-500">&gt; What I'd steal:<br />
-        {!! $steal !!}
-      </p>
+    <x-terminal.section label="what i'd steal">
+      {!! $steal !!}
+    </x-terminal.section>
   @endif
 
   @if($bookList->isNotEmpty())
-    <div class="my-6">
-      <p class="text-lime-500">&gt; Influenced by:</p>
+    <x-terminal.section label="influenced by">
       <ul class="list-disc pl-6">
         @foreach($bookList as $book)
-          @php($author = $val($book->author))
+          @php($bookAuthor = $val($book->author))
           @php($link = $val($book->link))
           <li>
-            <a href="{{ $book->url() }}" class="text-lime-500 hover:text-lime-400">{{ $book->title() }}</a>
-            @if($author)<span> — {{ $author }}</span>@endif
-            @if($link)<span> (<a href="{{ $link }}" class="underline">info</a>)</span>@endif
+            <a href="{{ $book->url() }}">{{ $book->title() }}</a>
+            @if($bookAuthor)<span> — {{ $bookAuthor }}</span>@endif
+            @if($link)<span> (<a href="{{ $link }}">info</a>)</span>@endif
           </li>
         @endforeach
       </ul>
-    </div>
+    </x-terminal.section>
   @endif
 
   @if($store)
-    <p class="my-4">
+    <p>
       <a href="{{ $store }}">Store page</a>
     </p>
   @endif
 
   <statamic:collection:next in="games" as="entries" limit="2" sort="date:desc">
 
-    @foreach ($entries as $entry)
-      <div class="post">
-        <a href="{{ $entry->url }}">{{ $entry->name ?? $entry->title }}</a>
-      </div>
-    @endforeach
+    <x-terminal.section label="up next">
+      @foreach ($entries as $entry)
+        <div class="post">
+          <a href="{{ $entry->url }}">{{ $entry->name ?? $entry->title }}</a>
+        </div>
+      @endforeach
+    </x-terminal.section>
 
   </statamic:collection:next>
 @endsection

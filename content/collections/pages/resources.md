@@ -4,9 +4,8 @@ blueprint: page
 title: Resources
 updated_by: 3ab86282-d8ca-45a1-bff1-07230cbc2c23
 updated_at: 1780934481
+terminal_file: useful-stuff.txt
 ---
-**mathieu@laptop:~/Resources$** cat useful-stuff.txt
-Checkout some cool stuff.
 
 - [UX.nl](https://ux.nl) - Top-notch webbuilders from The Netherlands
 - [Sparkofchaos.com](https://sparkofchaos.com) - Something awesome in the works
