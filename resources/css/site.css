@@ -9,8 +9,11 @@
 | being `cat`, the footer runs `fortune`. Two rules keep that from becoming a
 | costume:
 |
-|   1. Chrome vs prose. Prompts, readouts and the footer are "chrome" and carry
-|      the CRT treatment. Article body text never does, so long reads stay clean.
+|   1. One screen. The scanlined terminal background is the page background, so
+|      the whole site sits inside one screen rather than in two chrome panels
+|      with untextured page between them. It is painted behind the text, never
+|      over it, so prose keeps full contrast and long reads stay clean. Glow
+|      still belongs to chrome alone -- prompts and the nav, never a paragraph.
 |   2. One accent. --accent is the only hue in the interface. Three things sit
 |      outside it: the dungeon footer (artwork, --accent-dim), the 1-bit trivia
 |      icons and code blocks (Atom One Dark's palette), which are quoted
@@ -80,6 +83,20 @@
     font-family: var(--font-mono-stack);
     font-size: 1rem;
     line-height: var(--cell);
+
+    /*
+    | The screen. Scanlines run the full height of the site as a background
+    | rather than as an overlay per panel: behind the glyphs, so text keeps its
+    | contrast, and fixed to the viewport, because the phosphor grid of a real
+    | tube does not scroll with what is printed on it.
+    */
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0.3) 0 1px,
+      transparent 1px 3px
+    );
+    background-attachment: fixed;
   }
 
   a {
@@ -129,13 +146,23 @@
 }
 
 /*
-| Code blocks belong to Atom One Dark, imported above. It ships its own background,
-| padding and layout for `pre code.hljs`, so nothing here frames or textures them --
-| a border or scanlines would only draw a second box around the theme's own. Code is
-| therefore the one region that keeps a palette of its own, the way the artwork does.
+| Code blocks keep Atom One Dark's syntax hues -- quoted material, so like the
+| artwork they are allowed a palette of their own -- but not its box. The theme's
+| own background and padding are dropped: on one continuous screen a lighter panel
+| behind a fence reads as a second window floating over the terminal. Code now sits
+| on the same background and the same left edge as the prose, and the syntax colours
+| are what mark it as code.
 |
-| Only the outer margin is set, because Tailwind's preflight zeroes it.
+| The outer margin is set here because Tailwind's preflight zeroes it.
 */
+
+/* Unlayered on purpose: the imported theme is unlayered too, and an unlayered rule
+   beats every layer regardless of specificity, so an @layer override loses to it. */
+pre code.hljs {
+  background: transparent;
+  padding: 0;
+}
+
 @layer base {
   pre {
     margin-bottom: var(--cell);
@@ -150,26 +177,10 @@
 }
 
 /*
-| CRT treatment. Scanlines are a pseudo-element so they can never intercept a
-| click, and they are only ever applied to chrome -- never to a paragraph.
+| CRT treatment. Scanlines are the page background (see body, above); glow is the
+| half of it that still belongs to chrome alone.
 */
 @layer utilities {
-  .scanlines {
-    position: relative;
-  }
-
-  .scanlines::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgb(0 0 0 / 0.3) 0 1px,
-      transparent 1px 3px
-    );
-  }
-
   /* Phosphor bloom. Static, not animated: it sits behind every prompt on the
      site and a pulsing one would be unbearable. */
   .glow {
@@ -201,9 +212,10 @@
 
 /*
 | Chrome comes in two continuous panels -- one at the top holding the nav and the
-| page header, one at the bottom holding the fortune -- rather than a scanlined
-| strip per prompt. Alternating textured and plain bands every few lines read as
-| flicker; two panels give the page one transition into the prose and one out.
+| page header, one at the bottom holding the fortune. Now that the scanlines run the
+| whole page there is nothing left to draw per panel: the screen is continuous, so a
+| panel is only the block of space that keeps the session reading as header, output,
+| sign-off. Whitespace separates the three, not a texture and not a rule.
 */
 @layer components {
   /* The reading column. Panels run edge to edge; their contents line up with the
@@ -229,7 +241,6 @@
   .panel {
     padding-block: var(--cell);
     margin-bottom: calc(var(--cell) * 1);
-    border-bottom: 1px solid var(--rule);
   }
 }
 

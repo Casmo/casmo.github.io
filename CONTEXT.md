@@ -24,21 +24,26 @@ Decisions live in [docs/adr/](docs/adr/).
   a few pages override it with a hand-picked name (`introduction.txt`,
   `useful-stuff.txt`) that no field implies.
 
+**Screen**
+: The scanlined background, running the full height of the site. Painted behind the
+  glyphs rather than over them, so it never costs the text any contrast, and fixed to
+  the viewport, because a tube's phosphor grid does not scroll with what is printed on
+  it. There is one screen and everything sits on it — no region of the page carries a
+  background of its own, code blocks included.
+
 **Chrome**
 : Everything that frames the writing: prompt lines, the **Readout**, the footer. Chrome
-  carries the CRT treatment. Code blocks are not chrome — they are quoted material, and
-  keep their own theme.
+  is what the phosphor glow is allowed on. Code blocks are not chrome — they are quoted
+  material, and keep their own syntax colours.
 
 **Prose**
-: Article body text. Never carries the CRT treatment, so long reads stay legible. The
-  Chrome/Prose split is the rule that keeps the styling from becoming a costume.
+: Article body text. Never glows, so long reads stay legible.
 
 **Panel**
 : One continuous run of **Chrome** — the nav and page header share the panel at the top
-  of the page, the **Fortune** has the one at the bottom. Texture is applied per panel,
-  never per prompt: alternating textured and plain bands every few lines reads as
-  flicker rather than as a screen. A page therefore has one transition into the prose
-  and one out of it.
+  of the page, the **Fortune** has the one at the bottom. A panel is space, not a box:
+  it has no texture, background or rule of its own, and only exists to keep the page
+  reading as header, output, sign-off.
 
 **Shell**
 : The reading column. **Panels** run edge to edge, but their contents sit on this so
@@ -58,7 +63,7 @@ Decisions live in [docs/adr/](docs/adr/).
 **Accent**
 : The single interface hue. Governs all UI and text. Artwork is not interface and
   answers to **Accent Dim** instead. Two things keep their own colours outright: the
-  **Fortune** icons and code blocks.
+  **Fortune** icons and the syntax hues in code blocks.
 
 **Accent Dim**
 : The muted accent used by artwork — the **Dungeon**'s lit tiles — so the footer belongs

@@ -14,19 +14,20 @@
         <meta property="og:url" content="https://mathieuderuiter.nl{{ $page->url ?? $site->url }}">
         <meta name="author" content="Mathieu de Ruiter">
     </head>
-    <body class="bg-[#1f2329] text-zinc-400">
+    {{-- Background comes from site.css: the scanlined screen, full height, behind everything. --}}
+    <body class="text-zinc-400">
         {{--
         | Nav as `ls` output. Together with the page's own `cat` prompt and the
         | `fortune` at the bottom, the three prompts read as one session down the page
         | rather than three separate jokes.
         |
         | The nav and the page header share one continuous chrome panel, so the page has
-        | a single transition into the prose instead of a scanlined strip per prompt.
+        | a single transition into the prose instead of a rule per prompt.
         | Child views supply their header via @section('terminal-header'), not 'body'.
         |
         | Panels run edge to edge; .shell keeps their contents on the prose column.
         --}}
-        <div class="panel scanlines">
+        <div class="panel">
             <div class="shell">
                 <nav>
                     <x-terminal.prompt command="ls" />
@@ -55,8 +56,8 @@
         </div>
 
         {{-- Fortune: the Unix program that printed a random quip as you logged out.
-             The second chrome panel, so it is scanlined as a whole rather than per line. --}}
-        <div class="fortune scanlines" style="border-top: 1px solid var(--rule);">
+             The second chrome panel, set off from the prose by space alone. --}}
+        <div class="fortune">
             <div class="shell">
                 <x-terminal.prompt command="fortune" />
 
