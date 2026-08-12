@@ -41,7 +41,7 @@ Five Blade views each derive a shell path and filename inline. The generator nee
 - Produces: `\App\Support\Terminal::forEntry(\Statamic\Contracts\Entries\Entry $entry): array` returning `['path' => string, 'file' => string]`, e.g. `['path' => '~/blog/laravel', 'file' => 'recover-deleted-uploadcare-files-in-laravel.txt']`. Task 4 calls this.
 
 **Background the implementer needs:**
-- In Blade, `$page` is the `Statamic\Entries\Entry` itself (`Statamic\View\Cascade::hydrateContent()` does `$this->set('page', $this->content)`), so `Terminal::forEntry($page)` works inside these views.
+- In Blade, `$page` is the routed content object (`Statamic\View\Cascade::hydrateContent()` does `$this->set('page', $this->content)`), so `Terminal::forEntry($page)` works inside these views. **It is not always an `Entry`:** pages routed through a structure arrive as a `Statamic\Structures\Page`, which implements the `Statamic\Contracts\Entries\Entry` contract and forwards most calls to the entry it wraps — but declares its own `collection()`, returning the *mounted* collection (often null). So use `$entry->collectionHandle()`, which is forwarded, and never `$entry->collection()->handle()`, which fatals on `/`, `/blog`, `/reviews` and `/resources`.
 - `$entry->get('categories')` returns raw taxonomy slugs (`['laravel']`), so no augmentation is needed — `Terminal::path()` slugs each segment anyway.
 - The three collections in play are `blog`, `games` and `pages`. `books/show.blade.php` is deliberately excluded: its `$page` is a taxonomy Term, not an Entry, and it only calls `Terminal::file()`.
 
@@ -154,7 +154,12 @@ Add the import `use Statamic\Contracts\Entries\Entry;` alongside the existing `u
      */
     public static function forEntry(Entry $entry): array
     {
-        $segments = match ($entry->collection()->handle()) {
+        // collectionHandle() rather than collection()->handle(): pages routed
+        // through a structure (the "pages" collection) arrive here as a
+        // Statamic\Structures\Page, whose own collection() resolves the
+        // *mounted* collection -- often null -- instead of forwarding to the
+        // wrapped entry the way collectionHandle() does.
+        $segments = match ($entry->collectionHandle()) {
             'blog' => ['blog', collect($entry->get('categories') ?? [])->first()],
             'games' => ['reviews'],
             default => [$entry->value('title')],
