@@ -299,7 +299,7 @@ The renderer's one piece of real logic: choosing the largest size at which a tit
 **Background the implementer needs:**
 - The site loads IBM Plex Mono as `.woff2`, which GD cannot read, hence a TTF. The regular TTF is already in `resources/fonts/` for exactly this reason.
 - Bold and regular have the same advances (992px vs 990px for a 13-character string at 96pt — it is a monospace family), so the measurements below hold, but `fit()` must still measure with the **bold** face, because that is what gets drawn.
-- `maxRows($size)` is `floor(420 / ($size * 1.35))`: 2 rows at 118pt, 3 at 96pt, 4 at 78pt and 64pt, 5 at 54pt, 6 at 46pt, 7 at 40pt.
+- `maxRows($size)` is `floor(420 / ($size * 1.35))`: 2 rows at 118pt, 3 at 96pt, 3 at 78pt, 4 at 64pt, 5 at 54pt, 6 at 46pt, 7 at 40pt.
 
 - [ ] **Step 1: Add the bold face**
 
