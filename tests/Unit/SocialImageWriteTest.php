@@ -134,6 +134,43 @@ class SocialImageWriteTest extends TestCase
         );
     }
 
+    public function test_a_deep_path_that_already_fits_is_left_alone(): void
+    {
+        $this->assertSame(
+            'mathieu@laptop:~/blog/a/b/c/d/e/f$ cat x.txt',
+            $this->image()->prompt('mathieu@laptop', '~/blog/a/b/c/d/e/f', 'x.txt'),
+        );
+    }
+
+    public function test_a_long_path_collapses_to_its_last_segment(): void
+    {
+        $this->assertSame(
+            'mathieu@laptop:~/…/nested-directory$ cat x.txt',
+            $this->image()->prompt(
+                'mathieu@laptop',
+                '~/blog/'.str_repeat('nested-directory/', 6),
+                'x.txt',
+            ),
+        );
+    }
+
+    public function test_an_unshrinkable_line_is_truncated_to_the_measure(): void
+    {
+        $prompt = $this->image()->prompt(
+            'mathieu@laptop',
+            '~/'.str_repeat('z', 200),
+            'x.txt',
+        );
+
+        $this->assertStringEndsWith('…', $prompt);
+
+        $resources = dirname(__DIR__, 2).'/resources';
+        $box = imagettfbbox(22, 0, $resources.'/fonts/IBMPlexMono-Regular.ttf', $prompt);
+        $width = abs($box[2] - $box[0]);
+
+        $this->assertLessThanOrEqual(1056, $width);
+    }
+
     public function test_the_cursor_is_drawn_when_the_last_row_leaves_room(): void
     {
         $image = $this->image();

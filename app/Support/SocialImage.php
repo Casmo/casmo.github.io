@@ -147,21 +147,69 @@ class SocialImage
 
     /**
      * The prompt line. It never wraps and never shrinks -- a top line that
-     * changes size from post to post reads as an accident -- so a filename too
-     * long for the measure is elided instead.
+     * changes size from post to post reads as an accident -- so an overrun
+     * line is elided in up to three stages instead, each run only when the
+     * previous one still leaves the line too wide:
+     *
+     * 1. Shorten the filename to `head….txt`. Enough for every path this
+     *    site produces today.
+     * 2. Drop the leading path segments, keeping the last -- `~/a/b/c`
+     *    becomes `~/…/c` -- then shorten the filename again against that
+     *    shorter prefix.
+     * 3. Truncate the whole line to the measure with a trailing `…`. This is
+     *    what guarantees the line can never cross the margin, whatever the
+     *    host or path.
      */
     public function prompt(string $host, string $path, string $file): string
     {
         $prefix = $host.':'.$path.'$ cat ';
+        $line = $this->elideFilename($prefix, $file);
+
+        if ($this->fits($line)) {
+            return $line;
+        }
+
+        $segments = array_values(array_filter(explode('/', $path), fn ($segment) => $segment !== ''));
+
+        if (count($segments) >= 2) {
+            $collapsedPrefix = $host.':'.$segments[0].'/…/'.end($segments).'$ cat ';
+            $line = $this->elideFilename($collapsedPrefix, $file);
+
+            if ($this->fits($line)) {
+                return $line;
+            }
+        }
+
+        return $this->truncate($line);
+    }
+
+    /** Shortens the filename to `head….txt` until the line fits, or the head is spent. */
+    private function elideFilename(string $prefix, string $file): string
+    {
         $line = $prefix.$file;
         $base = preg_replace('/\.txt$/', '', $file);
 
-        while ($this->width($this->chromeFont, self::PROMPT_SIZE, $line) > self::MEASURE && mb_strlen($base) > 1) {
+        while (! $this->fits($line) && mb_strlen($base) > 1) {
             $base = mb_substr($base, 0, -1);
             $line = $prefix.$base.'….txt';
         }
 
         return $line;
+    }
+
+    /** Last resort: chop the whole line down to the measure with a trailing ellipsis. */
+    private function truncate(string $line): string
+    {
+        while (mb_strlen($line) > 1 && ! $this->fits($line.'…')) {
+            $line = mb_substr($line, 0, -1);
+        }
+
+        return $line.'…';
+    }
+
+    private function fits(string $line): bool
+    {
+        return $this->width($this->chromeFont, self::PROMPT_SIZE, $line) <= self::MEASURE;
     }
 
     public function write(string $destination, string $title, string $prompt, string $domain, ?string $date): void
