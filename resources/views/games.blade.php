@@ -22,12 +22,14 @@
 
     $cover = $val($capsule);
     $cover = is_iterable($cover) ? collect($cover)->first() : $cover;
+
+    $terminal = \App\Support\Terminal::forEntry($page);
 @endphp
 
 @section('terminal-header')
   <x-terminal.header
-    :path="\App\Support\Terminal::path($terminal_path ?? null, ['reviews'])"
-    :file="\App\Support\Terminal::file($terminal_file ?? null, $slug)"
+    :path="$terminal['path']"
+    :file="$terminal['file']"
     :rows="[
       'Game' => $gameName,
       'Developer' => $dev,

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\Str;
+use Statamic\Contracts\Entries\Entry;
 use Statamic\Fields\Value;
 
 /**
@@ -49,6 +50,32 @@ class Terminal
         $name = static::plain($override) ?? static::plain($slug) ?? 'index';
 
         return Str::endsWith($name, '.txt') ? $name : $name.'.txt';
+    }
+
+    /**
+     * The path and file for an entry, so a page and anything that describes it
+     * from the outside -- the social image -- cannot disagree about where the
+     * entry lives.
+     *
+     * @return array{path: string, file: string}
+     */
+    public static function forEntry(Entry $entry): array
+    {
+        // collectionHandle() rather than collection()->handle(): pages routed
+        // through a structure (the "pages" collection) arrive here as a
+        // Statamic\Structures\Page, whose own collection() resolves the
+        // *mounted* collection -- often null -- instead of forwarding to the
+        // wrapped entry the way collectionHandle() does.
+        $segments = match ($entry->collectionHandle()) {
+            'blog' => ['blog', collect($entry->get('categories') ?? [])->first()],
+            'games' => ['reviews'],
+            default => [$entry->value('title')],
+        };
+
+        return [
+            'path' => static::path($entry->get('terminal_path'), $segments),
+            'file' => static::file($entry->get('terminal_file'), $entry->slug()),
+        ];
     }
 
     /**

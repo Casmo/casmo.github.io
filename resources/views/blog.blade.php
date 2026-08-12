@@ -1,11 +1,11 @@
 @extends('default')
 
-@php($category = $categories->first())
+@php($terminal = \App\Support\Terminal::forEntry($page))
 
 @section('terminal-header')
   <x-terminal.header
-    :path="\App\Support\Terminal::path($terminal_path ?? null, ['blog', $category?->slug])"
-    :file="\App\Support\Terminal::file($terminal_file ?? null, $slug)"
+    :path="$terminal['path']"
+    :file="$terminal['file']"
     :user="$author->name ?? null"
     :rows="[
       'Title' => $title,
