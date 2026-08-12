@@ -176,11 +176,14 @@ Expected: PASS (6 tests)
 
 The views must keep rendering exactly the prompts they render today. Create `tests/Feature/PromptLineTest.php`:
 
+Note the `#[DataProvider]` attribute: PHPUnit 12 ignores the `@dataProvider` doc-comment annotation, and a test using it errors with `ArgumentCountError: Too few arguments`.
+
 ```php
 <?php
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PromptLineTest extends TestCase
@@ -197,7 +200,7 @@ class PromptLineTest extends TestCase
         ];
     }
 
-    /** @dataProvider pages */
+    #[DataProvider('pages')]
     public function test_the_page_prompt_names_its_own_path_and_file(string $url, string $path, string $file): void
     {
         $response = $this->get($url);
