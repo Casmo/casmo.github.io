@@ -77,9 +77,10 @@ the terminals this aesthetic imitates makes the swap *increase* period credibili
 rather than spend it. The cost is real: Plex is calmer and less idiosyncratic than Space
 Mono, so the site trades some personality for readability.
 
-**A TTF is still kept.** The browser loads woff2 (~62KB for four faces, down from 411KB
+**TTFs are still kept.** The browser loads woff2 (~62KB for four faces, down from 411KB
 of Space Mono TTF), but the OG image generator calls `imagettftext()`, which GD can only
-feed a TTF. `resources/fonts/IBMPlexMono-Regular.ttf` exists solely for that.
+feed a TTF. `resources/fonts/IBMPlexMono-Regular.ttf` and `-Bold.ttf` exist solely for
+that: the regular face sets the image's prompt and identity lines, the bold one its title.
 
 **`monogram` is gone**, so the trivia strip is set in the body face. Its 1-bit icons are
 now tinted rather than shown as authored.

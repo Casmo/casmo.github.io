@@ -196,7 +196,8 @@ Chromium in CI for one PNG.
 |---|---|
 | `app/Support/SocialImage.php` | new. Renders one PNG from resolved fields (title, prompt, domain, date, and the artwork/avatar/font paths). Its text-fitting step is a separate public method returning the chosen size and the wrapped lines, so the ladder is testable without GD or the filesystem. |
 | `app/Support/Terminal.php` | gains `forEntry()`. |
-| `app/Providers/AppServiceProvider.php` | keeps only the `SSG::after` wiring: query the entries, map each through `Terminal`, hand off to `SocialImage`. The ~80 lines of GD leave the provider. |
+| `app/Support/SocialImageGenerator.php` | new. Queries the published entries that have a URL, maps each through `Terminal`, and hands it to `SocialImage`. This loop was originally specified as living in the provider; it moved out because a closure registered on `SSG::after` cannot be called from a test, and "which entries get an image" is the rule most likely to regress silently. |
+| `app/Providers/AppServiceProvider.php` | keeps only the `SSG::after` wiring. The ~80 lines of GD leave the provider. |
 | `resources/views/*.blade.php` (5 files) | switch their `Terminal::path` / `Terminal::file` calls to `forEntry()`. |
 | `resources/fonts/IBMPlexMono-Bold.ttf` | new, build-time only. |
 
@@ -228,7 +229,10 @@ The repo carries only the stock `ExampleTest`s, so this stays proportionate:
 - **Slug-keyed collisions.** Images are keyed by slug alone, so a blog post and a
   review sharing a slug would overwrite each other. Pre-existing; no collisions
   today.
-- **Taxonomy and index pages** keep falling back to the site-level image.
+- **Taxonomy pages** get no image. `default.blade.php` builds the URL from the slug
+  regardless, and there is no site-level image behind it, so a routed term page would
+  advertise a preview that 404s. No term page is routed today; if one ever is, it needs
+  either its own generated image or a real site-level default.
 - **Per-entry custom images.** The `$page->image` override in `default.blade.php`
   already covers this and is untouched.
 
