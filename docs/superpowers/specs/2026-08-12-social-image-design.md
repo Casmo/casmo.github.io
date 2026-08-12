@@ -61,7 +61,7 @@ Three bands, all sharing the 72px left edge:
 
 | Band | Position | Content |
 |---|---|---|
-| Prompt | baseline at cell 2 (y 84) | `mathieu@laptop:~/blog/design$ cat the-interface-of-the-future.txt`, 22pt accent |
+| Prompt | baseline at cell 2 (y 84) | `mathieu@laptop:~/blog/design$ cat the-interface-of-the-future.txt`, fixed 22pt accent |
 | Title | cells 2.5–12.5 (y 105–525; 420px, two thirds of the canvas) | bold, `#e4e4e7`, block centred vertically, block cursor after the last word |
 | Identity | baseline at cell 14 (y 588) | 56px avatar at the left margin, `mathieuderuiter.nl` beside it, date flush right |
 
@@ -118,9 +118,29 @@ the distribution clusters at 64–96pt. Compare today: 40pt for short titles,
 20pt for anything over 70 characters. Short titles growing to 118pt is what keeps
 a one-word review from leaving a hole in the canvas.
 
-The prompt line does not use the ladder. It shrinks 1pt at a time from 22pt to a
-14pt floor until it fits the measure; below that the filename is elided to
-`head….txt`. It never wraps — a wrapped prompt stops reading as a command.
+The prompt line does not use the ladder. It is **always 22pt**, and the filename
+is elided to `head….txt` until the line fits the measure. It never wraps — a
+wrapped prompt stops reading as a command.
+
+A fixed size was chosen over shrinking to fit after measuring the real slugs:
+shrinking from 22pt to a 14pt floor put 7 of the 26 prompts at 14pt (two of them
+still needing elision) while 8 sat at 22pt, so the top line's weight and legibility
+would swing image to image — the opposite of the brief.
+
+At a fixed 22pt the measure holds about 70 characters, so 18 of the 26 filenames
+elide. That is accepted: slugs are long, and the title's size matters more than
+the tail of a filename.
+
+```
+mathieu@laptop:~/reviews$ cat volfied.txt
+mathieu@laptop:~/blog/design$ cat the-interface-of-the-fu….txt
+mathieu@laptop:~/blog/php$ cat composer-update-hanging-on….txt
+```
+
+The rejected alternative was a backslash line continuation carrying the full
+filename on a second row, as a real shell wraps a long command. It costs one 42px
+cell from the title band, which drops roughly 6 of the 26 titles a step down the
+ladder — the wrong trade when the brief is "text as big as possible".
 
 ## Content
 
