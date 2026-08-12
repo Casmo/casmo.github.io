@@ -32,6 +32,20 @@ class SocialImage
     /** Largest first: the first size the title fits at wins. */
     private const LADDER = [118, 96, 78, 64, 54, 46, 40];
 
+    private const PROMPT_SIZE = 22;
+
+    private const IDENTITY_SIZE = 20;
+
+    private const AVATAR_SIZE = 56;
+
+    private const BACKGROUND = '#1f2329';
+
+    private const ACCENT = '#84cc16';
+
+    private const TITLE = '#e4e4e7';
+
+    private const MUTED = '#6b7280';
+
     public function __construct(
         private string $titleFont,
         private string $chromeFont,
@@ -129,5 +143,174 @@ class SocialImage
         }
 
         return abs($box[2] - $box[0]);
+    }
+
+    /**
+     * The prompt line. It never wraps and never shrinks -- a top line that
+     * changes size from post to post reads as an accident -- so a filename too
+     * long for the measure is elided instead.
+     */
+    public function prompt(string $host, string $path, string $file): string
+    {
+        $prefix = $host.':'.$path.'$ cat ';
+        $line = $prefix.$file;
+        $base = preg_replace('/\.txt$/', '', $file);
+
+        while ($this->width($this->chromeFont, self::PROMPT_SIZE, $line) > self::MEASURE && mb_strlen($base) > 1) {
+            $base = mb_substr($base, 0, -1);
+            $line = $prefix.$base.'….txt';
+        }
+
+        return $line;
+    }
+
+    public function write(string $destination, string $title, string $prompt, string $domain, ?string $date): void
+    {
+        $image = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
+        imagealphablending($image, true);
+        imagefill($image, 0, 0, $this->colour($image, self::BACKGROUND));
+
+        $this->drawBackground($image);
+        $this->drawPrompt($image, $prompt);
+        $this->drawTitle($image, $title);
+        $this->drawIdentity($image, $domain, $date);
+
+        imagepng($image, $destination);
+    }
+
+    /** The constellation artwork, veiled so it never competes with the title. */
+    private function drawBackground($image): void
+    {
+        $artwork = $this->load($this->artwork);
+
+        imagecopyresampled(
+            $image, $artwork,
+            0, 0, 0, 0,
+            self::WIDTH, self::HEIGHT,
+            imagesx($artwork), imagesy($artwork),
+        );
+
+        // Alpha 70 of 127 is a 45% veil, leaving the lines at roughly 55%.
+        imagefilledrectangle($image, 0, 0, self::WIDTH, self::HEIGHT, $this->colour($image, self::BACKGROUND, 70));
+    }
+
+    /** The site's chrome glows; a flat renderer approximates it with a one-pixel halo. */
+    private function drawPrompt($image, string $prompt): void
+    {
+        $baseline = self::CELL * 2;
+        $halo = $this->colour($image, self::ACCENT, 105);
+
+        foreach ([[-1, 0], [1, 0], [0, -1], [0, 1]] as [$dx, $dy]) {
+            imagettftext($image, self::PROMPT_SIZE, 0, self::MARGIN + $dx, $baseline + $dy, $halo, $this->chromeFont, $prompt);
+        }
+
+        imagettftext($image, self::PROMPT_SIZE, 0, self::MARGIN, $baseline, $this->colour($image, self::ACCENT), $this->chromeFont, $prompt);
+    }
+
+    private function drawTitle($image, string $title): void
+    {
+        ['size' => $size, 'lines' => $lines] = $this->fit($title);
+
+        $lineHeight = $size * self::LINE_HEIGHT;
+        $capHeight = $size * 0.98;
+        $block = count($lines) * $lineHeight;
+
+        // Centred in the band: a one-word title should not leave a hole.
+        $baseline = self::TITLE_BAND_TOP + (self::TITLE_BAND_HEIGHT - $block) / 2 + $capHeight;
+        $colour = $this->colour($image, self::TITLE);
+        $end = self::MARGIN;
+
+        foreach ($lines as $index => $line) {
+            imagettftext($image, $size, 0, self::MARGIN, (int) $baseline, $colour, $this->titleFont, $line);
+
+            if ($index === count($lines) - 1) {
+                $end = self::MARGIN + $this->width($this->titleFont, $size, $line);
+                break;
+            }
+
+            $baseline += $lineHeight;
+        }
+
+        $advance = $this->width($this->titleFont, $size, 'M');
+
+        if ($this->cursorFits($size, end($lines))) {
+            imagefilledrectangle(
+                $image,
+                (int) ($end + $advance * 0.5),
+                (int) ($baseline - $capHeight * 0.78),
+                (int) ($end + $advance * 1.4),
+                (int) $baseline,
+                $this->colour($image, self::ACCENT),
+            );
+        }
+    }
+
+    /**
+     * The cursor is decoration: it never influenced the wrap or the chosen size,
+     * so when there is no room for it after the last row it is dropped rather
+     * than allowed to cross the margin.
+     */
+    public function cursorFits(int $size, string $lastLine): bool
+    {
+        $end = self::MARGIN + $this->width($this->titleFont, $size, $lastLine);
+        $advance = $this->width($this->titleFont, $size, 'M');
+
+        return $end + $advance * 1.4 <= self::WIDTH - self::MARGIN;
+    }
+
+    private function drawIdentity($image, string $domain, ?string $date): void
+    {
+        $baseline = self::CELL * 14;
+        $colour = $this->colour($image, self::MUTED);
+
+        $avatar = $this->load($this->avatar);
+        $scaled = imagecreatetruecolor(self::AVATAR_SIZE, self::AVATAR_SIZE);
+        imagealphablending($scaled, false);
+        imagesavealpha($scaled, true);
+        imagefill($scaled, 0, 0, imagecolorallocatealpha($scaled, 0, 0, 0, 127));
+        imagecopyresampled(
+            $scaled, $avatar,
+            0, 0, 0, 0,
+            self::AVATAR_SIZE, self::AVATAR_SIZE,
+            imagesx($avatar), imagesy($avatar),
+        );
+
+        // Optically centred on the text rather than aligned to its baseline.
+        $top = (int) ($baseline - self::IDENTITY_SIZE * 0.72 - (self::AVATAR_SIZE - self::IDENTITY_SIZE) / 2 - 6);
+        imagealphablending($image, true);
+        imagecopy($image, $scaled, self::MARGIN, $top, 0, 0, self::AVATAR_SIZE, self::AVATAR_SIZE);
+
+        imagettftext(
+            $image, self::IDENTITY_SIZE, 0,
+            self::MARGIN + self::AVATAR_SIZE + 20, $baseline,
+            $colour, $this->chromeFont, $domain,
+        );
+
+        if ($date === null || $date === '') {
+            return;
+        }
+
+        // Flush right: both ends anchored to the margins is what makes it read as aligned.
+        $x = self::WIDTH - self::MARGIN - $this->width($this->chromeFont, self::IDENTITY_SIZE, $date);
+        imagettftext($image, self::IDENTITY_SIZE, 0, (int) $x, $baseline, $colour, $this->chromeFont, $date);
+    }
+
+    /** A missing asset fails the build rather than shipping a blank card. */
+    private function load(string $path)
+    {
+        $image = is_file($path) ? @imagecreatefrompng($path) : false;
+
+        if ($image === false) {
+            throw new \RuntimeException("Could not read image [{$path}].");
+        }
+
+        return $image;
+    }
+
+    private function colour($image, string $hex, int $alpha = 0)
+    {
+        [$red, $green, $blue] = sscanf($hex, '#%02x%02x%02x');
+
+        return imagecolorallocatealpha($image, $red, $green, $blue, $alpha);
     }
 }
