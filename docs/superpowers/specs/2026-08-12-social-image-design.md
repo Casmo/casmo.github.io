@@ -122,6 +122,16 @@ The prompt line does not use the ladder. It is **always 22pt**, and the filename
 is elided to `head….txt` until the line fits the measure. It never wraps — a
 wrapped prompt stops reading as a command.
 
+Eliding the filename is enough for every path this site produces, but it cannot
+save a line whose `host:path$ cat ` prefix is itself wider than the measure. Two
+further steps run only when needed, so the line can never cross the margin:
+
+1. Drop the leading path segments, keeping the last —
+   `~/blog/nested-directory/…/niagara` becomes `~/…/niagara`, the way a shell
+   abbreviates a long path — then elide the filename again.
+2. If even that overruns (one enormous segment, or a very long host), truncate
+   the whole line to the measure with a trailing `…`.
+
 A fixed size was chosen over shrinking to fit after measuring the real slugs:
 shrinking from 22pt to a 14pt floor put 7 of the 26 prompts at 14pt (two of them
 still needing elision) while 8 sat at 22pt, so the top line's weight and legibility

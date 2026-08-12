@@ -593,6 +593,7 @@ The three bands, the artwork, the avatar and the cursor.
 - Call `imagealphablending($image, true)` before compositing the avatar, or its transparent corners overwrite the artwork instead of blending with it.
 - Baselines, not tops: `imagettftext()`'s `$y` is the text baseline.
 - The block cursor is decoration and must never change the wrap or the chosen size. Draw it only when it fits inside the right margin.
+- The prompt line elides in up to three stages, each running only when the line still overruns the measure: (1) shorten the filename to `head….txt`; (2) drop the leading path segments, keeping the last — `~/blog/a/b/c` becomes `~/…/c` — then re-run stage 1 against the shortened prefix; (3) truncate the whole line to the measure with a trailing `…`. Stage 3 guarantees the line can never cross the margin, whatever the host or path.
 
 - [ ] **Step 1: Write the failing test**
 
