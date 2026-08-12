@@ -52,9 +52,11 @@ class SocialImageGeneratorTest extends TestCase
 
     public function test_it_writes_one_image_per_routed_entry(): void
     {
-        $expected = Entry::query()->where('published', true)->get()
-            ->filter(fn ($entry) => filled($entry->url()))
-            ->count();
+        // Pinned rather than computed from the generator's own query, so a
+        // broken filter can't move both sides of the assertion together.
+        // 20 blog + 2 games + 4 pages today (2026-08-12). Bump this number
+        // when a post, review or page is added.
+        $expected = 26;
 
         $written = $this->generator()->generate();
 

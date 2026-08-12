@@ -85,4 +85,31 @@ class SocialImageFitTest extends TestCase
         $this->assertSame(str_repeat('a', 33), $result['lines'][0]);
         $this->assertSame('aa', end($result['lines']));
     }
+
+    /**
+     * A single word too wide to fit a rung disqualifies that rung rather than
+     * being hard-broken mid-word -- the hard break only happens at the 40pt
+     * floor. Before this rule, `Accessibility` broke into `Accessibili` /
+     * `ty` at 118pt instead of dropping to 96pt.
+     */
+    public function test_a_single_long_word_drops_a_rung_instead_of_breaking_mid_word(): void
+    {
+        $this->assertSame(
+            ['size' => 96, 'lines' => ['Accessibility']],
+            $this->image()->fit('Accessibility'),
+        );
+    }
+
+    public function test_a_single_longer_word_drops_further_still(): void
+    {
+        $this->assertSame(
+            ['size' => 78, 'lines' => ['Cinematography']],
+            $this->image()->fit('Cinematography'),
+        );
+
+        $this->assertSame(
+            ['size' => 78, 'lines' => ['Photogrammetry']],
+            $this->image()->fit('Photogrammetry'),
+        );
+    }
 }

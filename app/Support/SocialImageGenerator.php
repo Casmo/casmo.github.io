@@ -23,14 +23,18 @@ class SocialImageGenerator
     {
         $directory = $this->outputPath.'/assets/pages';
 
-        if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            // The is_dir() re-check tolerates a directory created concurrently
+            // between the first check and the mkdir() call.
+            throw new \RuntimeException("Could not create directory [{$directory}].");
         }
 
         $entries = Entry::query()
             ->where('published', true)
             ->get()
             ->filter(fn ($entry) => filled($entry->url()));
+
+        $written = 0;
 
         foreach ($entries as $entry) {
             ['path' => $path, 'file' => $file] = Terminal::forEntry($entry);
@@ -42,9 +46,11 @@ class SocialImageGenerator
                 self::DOMAIN,
                 $entry->date()?->format('F j, Y'),
             );
+
+            $written++;
         }
 
-        return $entries->count();
+        return $written;
     }
 
     /** The author's name, for the user half of the prompt. */

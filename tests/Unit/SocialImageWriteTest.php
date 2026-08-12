@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\SocialImage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class SocialImageWriteTest extends TestCase
@@ -98,6 +99,54 @@ class SocialImageWriteTest extends TestCase
         $this->assertGreaterThan(500000, $counts[0x1F2329] ?? 0, 'background');
     }
 
+    /**
+     * A geometry bug -- a prompt line 2293px wide against a 1056px measure --
+     * shipped undetected because the existing pixel-colour assertions only
+     * prove a band drew *something* in the right colour, never where. A long
+     * title (exercising the wrap) and a long path (exercising every prompt
+     * elision stage) should never paint text ink into the margins.
+     */
+    public function test_text_never_bleeds_into_the_margins(): void
+    {
+        $image = $this->image();
+
+        $prompt = $image->prompt(
+            'mathieu@laptop',
+            '~/blog/'.str_repeat('nested-directory/', 6),
+            'composer-update-hanging-on-loading-composer-repositories-with-package-information.txt',
+        );
+
+        $image->write(
+            $this->destination,
+            'Generate default Open Graph images for each Entry in your your Statamic site',
+            $prompt,
+            'mathieuderuiter.nl',
+            'August 1, 2026',
+        );
+
+        $png = imagecreatefrompng($this->destination);
+
+        // The avatar sits at x=72, inside the left margin, and is photographic --
+        // it will not exactly match these three flat colours.
+        $forbidden = [0xE4E4E7, 0x84CC16, 0x6B7280];
+
+        for ($y = 0; $y < SocialImage::HEIGHT; $y++) {
+            for ($x = 0; $x < 72; $x++) {
+                $this->assertNotContains(
+                    imagecolorat($png, $x, $y), $forbidden,
+                    "left margin pixel ({$x}, {$y}) matched a text colour",
+                );
+            }
+
+            for ($x = 1128; $x < SocialImage::WIDTH; $x++) {
+                $this->assertNotContains(
+                    imagecolorat($png, $x, $y), $forbidden,
+                    "right margin pixel ({$x}, {$y}) matched a text colour",
+                );
+            }
+        }
+    }
+
     public function test_it_writes_a_card_without_a_date(): void
     {
         $this->image()->write(
@@ -154,6 +203,30 @@ class SocialImageWriteTest extends TestCase
         );
     }
 
+    /**
+     * A 2-segment path (`~` plus one directory) has nothing to drop between
+     * first and last segment -- collapsing would insert `…/` without
+     * shortening anything, and could widen the line. It must go straight to
+     * whole-line truncation instead.
+     */
+    public function test_a_two_segment_path_that_cannot_fit_is_truncated_not_collapsed(): void
+    {
+        $prompt = $this->image()->prompt(
+            'mathieu@laptop',
+            '~/'.str_repeat('a', 120),
+            'x.txt',
+        );
+
+        $this->assertStringNotContainsString('…/', $prompt);
+        $this->assertStringEndsWith('…', $prompt);
+
+        $resources = dirname(__DIR__, 2).'/resources';
+        $box = imagettfbbox(22, 0, $resources.'/fonts/IBMPlexMono-Regular.ttf', $prompt);
+        $width = abs($box[2] - $box[0]);
+
+        $this->assertLessThanOrEqual(1056, $width);
+    }
+
     public function test_an_unshrinkable_line_is_truncated_to_the_measure(): void
     {
         $prompt = $this->image()->prompt(
@@ -187,19 +260,74 @@ class SocialImageWriteTest extends TestCase
         $this->assertFalse($image->cursorFits($fit['size'], end($fit['lines'])));
     }
 
-    public function test_a_missing_asset_fails_loudly(): void
+    public static function assets(): array
+    {
+        return [
+            'titleFont' => ['titleFont'],
+            'chromeFont' => ['chromeFont'],
+            'artwork' => ['artwork'],
+            'avatar' => ['avatar'],
+        ];
+    }
+
+    #[DataProvider('assets')]
+    public function test_a_missing_asset_fails_loudly(string $broken): void
     {
         $resources = dirname(__DIR__, 2).'/resources';
 
+        $paths = [
+            'titleFont' => $resources.'/fonts/IBMPlexMono-Bold.ttf',
+            'chromeFont' => $resources.'/fonts/IBMPlexMono-Regular.ttf',
+            'artwork' => $resources.'/img/og-background.png',
+            'avatar' => $resources.'/img/casmo.png',
+        ];
+
+        $paths[$broken] = $resources.'/img/does-not-exist.png';
+
+        $image = new SocialImage(...$paths);
+
+        $this->expectException(\RuntimeException::class);
+
+        $image->write($this->destination, 'Nostalgia', 'mathieu@laptop:~$ cat nostalgia.txt', 'mathieuderuiter.nl', null);
+    }
+
+    public function test_an_unusable_font_fails_loudly(): void
+    {
+        $resources = dirname(__DIR__, 2).'/resources';
+
+        // A readable file that is not a valid font: imagettfbbox() must reject it.
         $image = new SocialImage(
             titleFont: $resources.'/fonts/IBMPlexMono-Bold.ttf',
-            chromeFont: $resources.'/fonts/IBMPlexMono-Regular.ttf',
-            artwork: $resources.'/img/does-not-exist.png',
+            chromeFont: $resources.'/img/casmo.png',
+            artwork: $resources.'/img/og-background.png',
             avatar: $resources.'/img/casmo.png',
         );
 
         $this->expectException(\RuntimeException::class);
 
         $image->write($this->destination, 'Nostalgia', 'mathieu@laptop:~$ cat nostalgia.txt', 'mathieuderuiter.nl', null);
+    }
+
+    public function test_an_unwritable_destination_fails_loudly(): void
+    {
+        // A path nested under a file rather than a directory: writing to it
+        // fails without needing permission games in the sandbox.
+        $destination = $this->destination.'/nested.png';
+
+        file_put_contents($this->destination, 'not a directory');
+
+        $this->expectException(\RuntimeException::class);
+
+        try {
+            $this->image()->write(
+                $destination,
+                'Nostalgia',
+                'mathieu@laptop:~$ cat nostalgia.txt',
+                'mathieuderuiter.nl',
+                null,
+            );
+        } finally {
+            unlink($this->destination);
+        }
     }
 }

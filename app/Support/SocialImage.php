@@ -64,20 +64,35 @@ class SocialImage
         foreach (self::LADDER as $size) {
             $lines = $this->wrap($title, $size);
 
-            if (count($lines) <= $this->maxRows($size)) {
+            $overrunsMeasure = false;
+
+            foreach ($lines as $line) {
+                if ($this->width($this->titleFont, $size, $line) > self::MEASURE) {
+                    $overrunsMeasure = true;
+                    break;
+                }
+            }
+
+            if (! $overrunsMeasure && count($lines) <= $this->maxRows($size)) {
                 return ['size' => $size, 'lines' => $lines];
             }
         }
 
         $size = self::LADDER[count(self::LADDER) - 1];
-        $lines = array_slice($this->wrap($title, $size), 0, $this->maxRows($size));
+        $full = $this->wrap($title, $size, breakWords: true);
+        $rowsDropped = count($full) > $this->maxRows($size);
+        $lines = array_slice($full, 0, $this->maxRows($size));
         $last = array_pop($lines);
 
-        while ($last !== '' && $this->width($this->titleFont, $size, $last.'…') > self::MEASURE) {
-            $last = mb_substr($last, 0, -1);
+        if ($rowsDropped) {
+            while ($last !== '' && $this->width($this->titleFont, $size, $last.'…') > self::MEASURE) {
+                $last = mb_substr($last, 0, -1);
+            }
+
+            $last .= '…';
         }
 
-        $lines[] = $last.'…';
+        $lines[] = $last;
 
         return ['size' => $size, 'lines' => $lines];
     }
@@ -90,17 +105,19 @@ class SocialImage
 
     /**
      * Greedy word wrap to the measure. A single word too wide to ever fit is
-     * broken mid-word, because the alternative is a line running off the canvas.
+     * only broken mid-word when $breakWords is true -- the 40pt floor, where
+     * there is no lower rung to drop to. At every other rung, a wrapped line
+     * still wider than the measure disqualifies that rung instead.
      *
      * @return list<string>
      */
-    private function wrap(string $text, int $size): array
+    private function wrap(string $text, int $size, bool $breakWords = false): array
     {
         $lines = [];
         $current = '';
 
         foreach (preg_split('/\s+/', trim($text)) as $word) {
-            while ($this->width($this->titleFont, $size, $word) > self::MEASURE) {
+            while ($breakWords && $this->width($this->titleFont, $size, $word) > self::MEASURE) {
                 $head = $word;
 
                 while (mb_strlen($head) > 1 && $this->width($this->titleFont, $size, $head) > self::MEASURE) {
@@ -171,7 +188,10 @@ class SocialImage
 
         $segments = array_values(array_filter(explode('/', $path), fn ($segment) => $segment !== ''));
 
-        if (count($segments) >= 2) {
+        // Fewer than 3 segments means first and last are adjacent or the same --
+        // collapsing would insert a `…/` where nothing was dropped, and could
+        // widen the line instead of narrowing it.
+        if (count($segments) >= 3) {
             $collapsedPrefix = $host.':'.$segments[0].'/…/'.end($segments).'$ cat ';
             $line = $this->elideFilename($collapsedPrefix, $file);
 
@@ -214,6 +234,8 @@ class SocialImage
 
     public function write(string $destination, string $title, string $prompt, string $domain, ?string $date): void
     {
+        $this->validateAssets();
+
         $image = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
         imagealphablending($image, true);
         imagefill($image, 0, 0, $this->colour($image, self::BACKGROUND));
@@ -223,11 +245,38 @@ class SocialImage
         $this->drawTitle($image, $title);
         $this->drawIdentity($image, $domain, $date);
 
-        imagepng($image, $destination);
+        if (! @imagepng($image, $destination)) {
+            throw new \RuntimeException("Could not write image to [{$destination}].");
+        }
+    }
+
+    /**
+     * Fonts and images are all loaded lazily by the draw methods, so a broken
+     * font would otherwise only surface if its glyphs happened to be measured
+     * first -- which a dateless entry (every `pages` and `games` entry) never
+     * does for the chrome font. Check all four up front instead.
+     */
+    private function validateAssets(): void
+    {
+        foreach ([$this->titleFont, $this->chromeFont] as $font) {
+            if (! is_file($font) || ! is_readable($font)) {
+                throw new \RuntimeException("Could not read font [{$font}].");
+            }
+
+            if (@imagettfbbox(self::PROMPT_SIZE, 0, $font, 'Ag') === false) {
+                throw new \RuntimeException("Could not use font [{$font}].");
+            }
+        }
+
+        foreach ([$this->artwork, $this->avatar] as $path) {
+            if (! is_file($path) || ! is_readable($path)) {
+                throw new \RuntimeException("Could not read image [{$path}].");
+            }
+        }
     }
 
     /** The constellation artwork, veiled so it never competes with the title. */
-    private function drawBackground($image): void
+    private function drawBackground(\GdImage $image): void
     {
         $artwork = $this->load($this->artwork);
 
@@ -243,7 +292,7 @@ class SocialImage
     }
 
     /** The site's chrome glows; a flat renderer approximates it with a one-pixel halo. */
-    private function drawPrompt($image, string $prompt): void
+    private function drawPrompt(\GdImage $image, string $prompt): void
     {
         $baseline = self::CELL * 2;
         $halo = $this->colour($image, self::ACCENT, 105);
@@ -255,7 +304,7 @@ class SocialImage
         imagettftext($image, self::PROMPT_SIZE, 0, self::MARGIN, $baseline, $this->colour($image, self::ACCENT), $this->chromeFont, $prompt);
     }
 
-    private function drawTitle($image, string $title): void
+    private function drawTitle(\GdImage $image, string $title): void
     {
         ['size' => $size, 'lines' => $lines] = $this->fit($title);
 
@@ -306,7 +355,7 @@ class SocialImage
         return $end + $advance * 1.4 <= self::WIDTH - self::MARGIN;
     }
 
-    private function drawIdentity($image, string $domain, ?string $date): void
+    private function drawIdentity(\GdImage $image, string $domain, ?string $date): void
     {
         $baseline = self::CELL * 14;
         $colour = $this->colour($image, self::MUTED);
@@ -344,7 +393,7 @@ class SocialImage
     }
 
     /** A missing asset fails the build rather than shipping a blank card. */
-    private function load(string $path)
+    private function load(string $path): \GdImage
     {
         $image = is_file($path) ? @imagecreatefrompng($path) : false;
 
@@ -355,7 +404,7 @@ class SocialImage
         return $image;
     }
 
-    private function colour($image, string $hex, int $alpha = 0)
+    private function colour(\GdImage $image, string $hex, int $alpha = 0): int
     {
         [$red, $green, $blue] = sscanf($hex, '#%02x%02x%02x');
 
