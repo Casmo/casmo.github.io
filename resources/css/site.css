@@ -473,10 +473,10 @@ pre code.hljs {
      ever half a pixel. zoom rather than a width because the sheet grows as
      icons are added and any fixed width would eventually distort it; transform
      would scale the paint and leave the unscaled box in the flow. max-width:
-     none overrides the base layer's img rule (as .palette does for its own
-     container) so a wide sheet overflows the column instead of being resampled
-     to fit it -- for pixel art, exact pixels win over a fitted box, and an
-     overflow is a visible prompt to lower the mobile zoom step.
+     none takes the sheet out from under the base layer's img rule (as .palette
+     does for its own container), so nothing there can clamp it into a
+     non-integer scale -- for pixel art, overflow is preferred to resampling,
+     and an overflow is a visible prompt to lower the mobile zoom step.
 
      Untinted, like .fortune__icon and for the same reason. */
   .trivia-sheet {

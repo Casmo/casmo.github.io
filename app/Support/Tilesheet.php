@@ -3,7 +3,7 @@
 namespace App\Support;
 
 /**
- * Lays a set of small PNGs out on one grid and writes the sheet.
+ * Lays a set of small images out on one grid and writes the sheet as a PNG.
  *
  * The cell is the largest source in each axis, so every tile is addressable
  * by index alone. Nothing is resampled: the sources are pixel art, and they
@@ -25,7 +25,7 @@ final class Tilesheet
     public const GUTTER = 1;
 
     /**
-     * @param  list<string>  $sources  absolute paths to the source PNGs, in tile order
+     * @param  list<string>  $sources  absolute paths to the source images, in tile order
      * @return array{width: int, height: int}|null null when there is nothing to draw
      */
     public function write(string $destination, array $sources): ?array
@@ -85,7 +85,9 @@ final class Tilesheet
     /** @return \GdImage a source with its alpha preserved as authored */
     private function read(string $source): \GdImage
     {
-        $image = @imagecreatefrompng($source);
+        $contents = @file_get_contents($source);
+
+        $image = $contents === false ? false : @imagecreatefromstring($contents);
 
         if (! $image) {
             throw new \RuntimeException("Could not read the icon at [{$source}].");

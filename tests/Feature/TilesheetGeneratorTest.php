@@ -83,6 +83,40 @@ class TilesheetGeneratorTest extends TestCase
         $this->assertFileExists($this->sheet());
     }
 
+    public function test_it_matches_the_committed_asset_pixel_for_pixel(): void
+    {
+        // The pinned 127x14 assertion above only catches a new icon changing
+        // the grid's dimensions. It would miss an icon redrawn or swapped at
+        // the same size, and the committed asset and its meta would then be
+        // silently wrong until someone noticed. Compare pixels, not bytes:
+        // byte equality happens to hold today but isn't portable across GD
+        // builds, and this has to be green on both PHP 8.5 locally and 8.4 in
+        // CI.
+        $this->generator()->generate();
+
+        $committed = imagecreatefrompng(base_path('public/assets/trivia-tilesheet.png'));
+        $generated = imagecreatefrompng($this->sheet());
+
+        $width = imagesx($committed);
+        $height = imagesy($committed);
+
+        $regenerate = 'the committed public/assets/trivia-tilesheet.png no longer matches the '
+            .'current trivia icons -- regenerate it by running `php please ssg:generate`';
+
+        $this->assertSame($width, imagesx($generated), $regenerate);
+        $this->assertSame($height, imagesy($generated), $regenerate);
+
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $this->assertSame(
+                    imagecolorat($committed, $x, $y),
+                    imagecolorat($generated, $x, $y),
+                    "{$regenerate} (differs at pixel {$x},{$y})",
+                );
+            }
+        }
+    }
+
     public function test_it_writes_the_build_copy_as_well_as_the_asset(): void
     {
         // copyFiles() runs before SSG::after, so the sheet has to be put in

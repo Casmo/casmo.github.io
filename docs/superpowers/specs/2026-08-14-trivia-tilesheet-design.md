@@ -208,9 +208,14 @@ gets a rule in the components layer:
 `zoom` rather than a width because it scales by an exact integer whatever the
 intrinsic size turns out to be, so no pixel is ever half a pixel; `transform:
 scale()` would scale the paint and leave a 127px hole in the flow. At 4× the
-sheet is 508px wide today and 636px at a full ten columns, both inside the
-`.shell` measure of 42rem. The 2× step under 768px keeps it off the edge of a
-phone, still on whole pixels.
+sheet is 508px wide today, comfortably inside the reading measure: `.shell`
+(`resources/css/site.css:222-226`) is `max-width: 42rem` (672px) *plus*
+`padding-inline`, and Tailwind's preflight sets `box-sizing: border-box`, so
+the actual measure is 608px at ≥1024px and 624px at 640–1023px. A full ten
+columns (159px intrinsic × 4 = 636px) would exceed that measure by 12–28px --
+a future problem for whoever adds the icon that fills the sheet, not one this
+CSS chases today. The 2× step under 768px keeps it off the edge of a phone,
+still on whole pixels.
 
 The sheet is untinted, the same exemption from the single-accent rule that
 `.fortune__icon` already documents.

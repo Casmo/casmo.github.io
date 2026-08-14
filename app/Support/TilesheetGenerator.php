@@ -10,15 +10,17 @@ use Statamic\Fields\Value;
 /**
  * Publishes one tilesheet of every trivia icon.
  *
- * It writes three files: the asset under public/, the .meta yaml that puts
- * the asset in Statamic's asset map, and a copy in the SSG output. The third
- * exists because the SSG copies public/assets into the output *before* it
- * runs the after hook, so writing only to public/ would ship the new sheet
- * one deploy late.
+ * It writes three files: the asset under public/, the .meta yaml that
+ * pre-caches its metadata so the control panel does not have to generate it
+ * on first view, and a copy in the SSG output. The third exists because the
+ * SSG copies public/assets into the output *before* it runs the after hook,
+ * so writing only to public/ would ship the new sheet one deploy late.
  */
 class TilesheetGenerator
 {
     public const FILENAME = 'trivia-tilesheet.png';
+
+    public const COLLECTION = 'trivia';
 
     public function __construct(
         private Tilesheet $tilesheet,
@@ -30,14 +32,37 @@ class TilesheetGenerator
     public function generate(): ?array
     {
         $asset = $this->directory($this->publicPath.'/assets').'/'.self::FILENAME;
+        $temp = $asset.'.tmp';
 
-        $written = $this->tilesheet->write($asset, $this->sources($this->entries()));
+        try {
+            $written = $this->tilesheet->write($temp, $this->sources($this->entries()));
 
-        if ($written === null) {
-            return null;
+            if ($written === null) {
+                return null;
+            }
+
+            $meta = dirname($asset).'/.meta/'.basename($asset).'.yaml';
+
+            // filemtime() moves on every render even when the bytes don't, so
+            // rewriting the asset unconditionally would dirty the committed
+            // PNG and its meta on every build. Only replace them when the
+            // rendered bytes actually differ from what's already there.
+            if (! is_file($asset) || ! is_file($meta) || ! $this->identical($temp, $asset)) {
+                $this->replace($temp, $asset);
+                $this->writeMeta($asset, $written);
+            }
+        } finally {
+            // write() can throw partway through (a bad source, an unwritable
+            // temp path), and replace() leaves the temp file in place if the
+            // rename fails -- either way, never leave it on disk.
+            if (is_file($temp)) {
+                $this->unlink($temp);
+            }
         }
 
-        $this->writeMeta($asset, $written);
+        // Unconditional: the output directory is cleared by every build, so
+        // the build copy has to be written every time, not just when the
+        // asset itself changed.
         $this->copyToOutput($asset);
 
         return $written;
@@ -79,10 +104,14 @@ class TilesheetGenerator
      */
     private function entries(): \Illuminate\Support\Collection
     {
-        $collection = Collection::findByHandle('trivia');
+        $collection = Collection::findByHandle(self::COLLECTION);
+
+        if (! $collection) {
+            throw new \RuntimeException('Could not find the ['.self::COLLECTION.'] collection.');
+        }
 
         return Entry::query()
-            ->where('collection', 'trivia')
+            ->where('collection', self::COLLECTION)
             ->where('published', true)
             ->orderBy($collection->sortField(), $collection->sortDirection())
             ->get();
@@ -117,6 +146,27 @@ class TilesheetGenerator
 
         if (! @copy($asset, $destination)) {
             throw new \RuntimeException("Could not copy the tilesheet to [{$destination}].");
+        }
+    }
+
+    /** Byte-for-byte: this is what decides whether the committed asset moves. */
+    private function identical(string $left, string $right): bool
+    {
+        return filesize($left) === filesize($right)
+            && file_get_contents($left) === file_get_contents($right);
+    }
+
+    private function replace(string $temp, string $asset): void
+    {
+        if (! @rename($temp, $asset)) {
+            throw new \RuntimeException("Could not replace [{$asset}].");
+        }
+    }
+
+    private function unlink(string $path): void
+    {
+        if (! @unlink($path)) {
+            throw new \RuntimeException("Could not remove [{$path}].");
         }
     }
 
