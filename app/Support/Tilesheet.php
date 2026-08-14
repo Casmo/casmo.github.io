@@ -69,14 +69,11 @@ final class Tilesheet
                 $tileWidth,
                 $tileHeight,
             );
-
-            imagedestroy($tile);
         }
 
         // Suppressed so a failure surfaces as the exception below rather than
         // as a warning from somewhere inside GD.
         $ok = @imagepng($sheet, $destination);
-        imagedestroy($sheet);
 
         if (! $ok) {
             throw new \RuntimeException("Could not write the tilesheet to [{$destination}].");
