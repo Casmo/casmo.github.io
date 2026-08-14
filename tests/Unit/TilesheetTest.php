@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\Tilesheet;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
 
 class TilesheetTest extends TestCase
@@ -191,6 +192,7 @@ class TilesheetTest extends TestCase
         $this->assertFileDoesNotExist($this->destination);
     }
 
+    #[WithoutErrorHandler]
     public function test_it_throws_when_a_source_cannot_be_read(): void
     {
         $missing = $this->directory.'/absent.png';
@@ -201,6 +203,7 @@ class TilesheetTest extends TestCase
         (new Tilesheet)->write($this->destination, [$missing]);
     }
 
+    #[WithoutErrorHandler]
     public function test_it_throws_when_the_sheet_cannot_be_written(): void
     {
         $destination = $this->directory.'/no-such-directory/sheet.png';
