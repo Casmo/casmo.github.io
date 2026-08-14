@@ -13,6 +13,9 @@ terminal_file: useful-stuff.txt
 - [Github.com/casmo](https://github.com/casmo) - My GitHub page
 - [linkedin.com/in/mathieuderuiter/](https://linkedin.com/in/mathieuderuiter/) - LinkedIn
 
+## 1 bit MS-DOS pixel art
+A collection of handmade pixels from the 80s, 90s and 00s.
+
 <img class="trivia-sheet" src="/assets/trivia-tilesheet.png" alt="Every icon from the fortunes, in a grid" />
 
 ## Books
