@@ -472,11 +472,16 @@ pre code.hljs {
   /* The trivia tilesheet: 1-bit art at an exact integer scale, so no pixel is
      ever half a pixel. zoom rather than a width because the sheet grows as
      icons are added and any fixed width would eventually distort it; transform
-     would scale the paint and leave the unscaled box in the flow.
+     would scale the paint and leave the unscaled box in the flow. max-width:
+     none overrides the base layer's img rule (as .palette does for its own
+     container) so a wide sheet overflows the column instead of being resampled
+     to fit it -- for pixel art, exact pixels win over a fitted box, and an
+     overflow is a visible prompt to lower the mobile zoom step.
 
      Untinted, like .fortune__icon and for the same reason. */
   .trivia-sheet {
     display: block;
+    max-width: none;
     image-rendering: pixelated;
     zoom: 4;
   }
