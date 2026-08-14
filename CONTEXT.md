@@ -84,6 +84,12 @@ Decisions live in [docs/adr/](docs/adr/).
 **Trivia**
 : The collection the **Fortune** draws from. Each entry is one fact plus a 1-bit icon.
 
+**Trivia Tilesheet**
+: Every **Trivia** icon on one generated grid, one cell per icon, sized to the largest
+  icon in each axis and shown on the resources page. Distinct from the **Dungeon**'s
+  tilemap, which is hand-authored artwork: this one is derived from the collection and
+  rewritten on every build.
+
 **Dungeon**
 : The pixel-art room across the bottom of every page, drawn as a grid of tiles cut from
   a single tilemap and authored by hand as a grid of coordinates. Artwork, not

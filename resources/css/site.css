@@ -469,6 +469,24 @@ pre code.hljs {
     color: var(--fg);
   }
 
+  /* The trivia tilesheet: 1-bit art at an exact integer scale, so no pixel is
+     ever half a pixel. zoom rather than a width because the sheet grows as
+     icons are added and any fixed width would eventually distort it; transform
+     would scale the paint and leave the unscaled box in the flow.
+
+     Untinted, like .fortune__icon and for the same reason. */
+  .trivia-sheet {
+    display: block;
+    image-rendering: pixelated;
+    zoom: 4;
+  }
+
+  @media (max-width: 767px) {
+    .trivia-sheet {
+      zoom: 2;
+    }
+  }
+
   /* Dungeon footer: a tile grid cut from /assets/tilemap.png (20 x 20 tiles of 16px, 1px apart). */
   .dungeon {
     /* Integer zoom, so 2 = 32px tiles. Same size on every screen: wider screens
