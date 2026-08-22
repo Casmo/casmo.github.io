@@ -291,7 +291,7 @@ switching an existing channel between single-file and directory pushes is a
 `--userversion` is the icon count and the commit, so a build on the page can be
 traced to a commit and the count is legible at a glance.
 
-Butler is downloaded from itch's own `broth.itch.ovh` rather than pulled from a
+Butler is downloaded from itch's own `broth.itch.zone` rather than pulled from a
 marketplace action. This step holds a publishing credential, and the official
 binary is one fewer third party to trust with it.
 
