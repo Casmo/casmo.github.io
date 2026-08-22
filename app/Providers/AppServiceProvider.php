@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Support\Files;
+use App\Support\ItchAssetsGenerator;
 use App\Support\SocialImage;
 use App\Support\SocialImageGenerator;
 use App\Support\Tilesheet;
 use App\Support\TilesheetGenerator;
 use App\Support\TriviaIcons;
+use App\Support\Upscale;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Statamic\StaticSite\SSG;
@@ -48,6 +51,17 @@ class AppServiceProvider extends ServiceProvider
                 new Tilesheet,
                 new TriviaIcons,
                 public_path(),
+                config('statamic.ssg.output_path'),
+            ))->generate();
+
+            // The upscaled images the itch.io page hotlinks. Output only:
+            // they are never shown on the site, and public/assets is an asset
+            // container that would want a .meta yaml for each one.
+            (new ItchAssetsGenerator(
+                new Upscale,
+                new TriviaIcons,
+                new Files,
+                public_path('assets/'.TilesheetGenerator::FILENAME),
                 config('statamic.ssg.output_path'),
             ))->generate();
         });
