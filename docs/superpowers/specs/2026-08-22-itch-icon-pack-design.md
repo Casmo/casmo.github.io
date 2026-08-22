@@ -364,10 +364,6 @@ image shown on the resources page, the pack is what a buyer downloads.
 
 ## Out of scope
 
-- **The stale committed tilesheet.** `public/assets/trivia-tilesheet.png` stays at
-  127×14 until something regenerates it. This spec routes around it rather than
-  fixing it, and no artefact here reads it. Fixing it is a one-command commit,
-  separate from this work.
 - **The resources page overflowing.** At 169px the sheet is 676px at the page's
   `zoom: 4`, past the 608px reading measure — the "future problem for whoever
   adds the icon that fills the sheet" the tilesheet spec called out. Gobliiins
@@ -427,5 +423,57 @@ image shown on the resources page, the pack is what a buyer downloads.
   actually writes. This is the only test that crosses the two classes, and the
   only one that catches a naming drift between them.
 
-The existing `TilesheetTest` and `TilesheetGeneratorTest` are the regression check
-on the `TriviaIcons` extraction and must pass untouched.
+`TilesheetTest` is the regression check on the `TriviaIcons` extraction and must
+pass untouched — it is pure grid arithmetic and does not know the collection
+exists.
+
+`TilesheetGeneratorTest` **cannot** pass untouched, because it does not pass now.
+See Baseline below.
+
+## Baseline
+
+`php artisan test` is **red on `main`** before any of this work, six failures from
+two unrelated causes. Both are pinned-count tests that drift whenever content is
+added:
+
+| Test | Assertion | Cause |
+|---|---|---|
+| `TilesheetGeneratorTest` ×5 | `127×14`, `assertCount(8)`, tile index `7`, `cellWidth = 15` | trivia icons went 8 → 11 |
+| `SocialImageGeneratorTest` ×1 | `$expected = 26` routed entries | blog posts went 26 → 27 |
+
+This changes the shape of the work. The stale committed tilesheet is not an
+adjacent bug to route around, as an earlier draft of this spec had it — it is a
+**prerequisite**, because `test_it_matches_the_committed_asset_pixel_for_pixel`
+compares the generated sheet against the committed one and stays red until the
+committed file is regenerated. And a red baseline makes TDD unjudgeable: "run the
+tests, see them fail for the reason you expect" is not a usable gate when six
+unrelated tests are already failing.
+
+So implementation opens by restoring green, before any new file is created:
+
+1. Regenerate the committed sheet to 169×29. Verified mechanism, no full SSG build
+   needed:
+
+   ```
+   php artisan tinker --execute='(new App\Support\TilesheetGenerator(
+       new App\Support\Tilesheet, public_path(), config("statamic.ssg.output_path")
+   ))->generate();'
+   ```
+
+2. Re-pin `TilesheetGeneratorTest` to 11 icons: `169×29`, `assertCount(11)`, last
+   tile index `10`, `cellWidth = 16`. Tile 10 is the first tile of row two, so the
+   ordering assertion also has to account for a `$top` offset it never needed
+   while the sheet was one row.
+3. Re-pin `SocialImageGeneratorTest` to 27. Unrelated to this feature, but the
+   full suite is the verification gate for every task below, so it has to be
+   green.
+4. Commit the `.meta` yaml Statamic generates as a side effect of step 1. Six of
+   the eleven trivia icons already have committed meta and five do not; the
+   regeneration produces the missing ones. This is the same mechanism as the
+   untracked `tilemap.png.yaml` in `git status`, and committing them matches what
+   the repo already does.
+
+Steps 2 and 3 re-pin numbers that will drift again on the next content change.
+That is the existing design of these tests — they trade maintenance for catching
+silent asset drift, and the pixel-for-pixel test's failure message already tells
+you how to fix it. Not a pattern to change here.
