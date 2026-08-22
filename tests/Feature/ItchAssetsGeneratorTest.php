@@ -120,12 +120,13 @@ class ItchAssetsGeneratorTest extends TestCase
 
     public function test_it_throws_when_the_output_cannot_be_written(): void
     {
-        $this->expectException(\RuntimeException::class);
-
         // A file where the directory needs to be: mkdir cannot succeed.
         $blocked = storage_path('framework/testing/itch-blocked');
         @mkdir(dirname($blocked), 0755, true);
         file_put_contents($blocked, 'not a directory');
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/'.preg_quote($blocked, '/').'/');
 
         try {
             $this->generator($blocked)->generate();

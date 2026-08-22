@@ -96,7 +96,7 @@ class TilesheetGeneratorTest extends TestCase
 
     public function test_it_matches_the_committed_asset_pixel_for_pixel(): void
     {
-        // The pinned 127x14 assertion above only catches a new icon changing
+        // The pinned 169x29 assertion above only catches a new icon changing
         // the grid's dimensions. It would miss an icon redrawn or swapped at
         // the same size, and the committed asset and its meta would then be
         // silently wrong until someone noticed. Compare pixels, not bytes:

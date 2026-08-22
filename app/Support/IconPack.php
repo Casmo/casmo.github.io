@@ -30,6 +30,12 @@ final class IconPack
      */
     public function write(string $staging, array $icons, string $tilesheet): int
     {
+        // The blueprint lets an author pick an icon from any assets folder,
+        // but icons are copied to icons/<basename> -- two icons sharing a
+        // basename from different folders would collapse onto one file and
+        // silently mispair an icon with the wrong fact on the published page.
+        $this->assertNoBasenameCollisions($icons);
+
         // Cleared rather than merged: an icon removed from the collection
         // would otherwise linger from an earlier run and ship to buyers.
         $this->clear($staging);
@@ -73,6 +79,25 @@ final class IconPack
         }
 
         return implode("\n", $lines)."\n";
+    }
+
+    /** @param  list<array{path: string, title: string}>  $icons */
+    private function assertNoBasenameCollisions(array $icons): void
+    {
+        $seen = [];
+
+        foreach ($icons as $icon) {
+            $basename = basename($icon['path']);
+
+            if (isset($seen[$basename]) && $seen[$basename] !== $icon['path']) {
+                throw new \RuntimeException(
+                    "Two icons share the filename [{$basename}]: ".
+                    "[{$seen[$basename]}] and [{$icon['path']}]."
+                );
+            }
+
+            $seen[$basename] = $icon['path'];
+        }
     }
 
     private function copy(string $source, string $destination): void

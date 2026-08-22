@@ -9,6 +9,7 @@ on:
     branches: ["main"]
     paths:
       - 'content/collections/trivia/**'
+      - 'content/collections/trivia.yaml'
       - 'public/assets/trivia/**'
       - 'app/Support/Tilesheet*.php'
       - 'app/Support/Itch*.php'
@@ -31,6 +32,10 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # workflow_dispatch can be run from any branch; without this guard a
+    # manual run from a feature branch would push that branch's pack to the
+    # live icons channel.
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -58,7 +63,7 @@ jobs:
       # this step holds a publishing credential.
       - name: Install butler
         run: |
-          curl -sL -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          curl -fsL -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
           unzip -q butler.zip
           chmod +x butler
           ./butler -V

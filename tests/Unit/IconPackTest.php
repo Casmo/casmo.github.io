@@ -156,4 +156,28 @@ class IconPackTest extends TestCase
             $this->png('sheet'),
         );
     }
+
+    public function test_it_throws_when_two_icons_share_a_basename(): void
+    {
+        // The blueprint has no folder restriction on which icon an author
+        // picks, so two different source folders can each hold a
+        // "quake-1-pixel-logo.png". Copying both to icons/<basename> would
+        // collapse them onto one file and silently mispair an icon with the
+        // wrong fact -- failing loudly here is better than shipping that.
+        mkdir($this->directory.'/other', 0755, true);
+
+        $first = $this->png('shared');
+        $second = $this->directory.'/other/shared.png';
+        copy($first, $second);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/shared\.png/');
+        $this->expectExceptionMessageMatches('/'.preg_quote($first, '/').'/');
+        $this->expectExceptionMessageMatches('/'.preg_quote($second, '/').'/');
+
+        $this->pack()->write($this->staging, [
+            ['path' => $first, 'title' => 'first icon'],
+            ['path' => $second, 'title' => 'second icon'],
+        ], $this->png('sheet'));
+    }
 }
