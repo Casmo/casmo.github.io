@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Support\Tilesheet;
 use App\Support\TilesheetGenerator;
+use App\Support\TriviaIcons;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\YAML;
@@ -53,7 +54,12 @@ class TilesheetGeneratorTest extends TestCase
 
     private function generator(): TilesheetGenerator
     {
-        return new TilesheetGenerator(new Tilesheet, $this->public, $this->output);
+        return new TilesheetGenerator(
+            new Tilesheet,
+            new TriviaIcons,
+            $this->public,
+            $this->output,
+        );
     }
 
     private function sheet(): string
@@ -61,12 +67,16 @@ class TilesheetGeneratorTest extends TestCase
         return $this->public.'/assets/trivia-tilesheet.png';
     }
 
-    /** An entry-shaped stub: sources() only ever reads ->icon. */
-    private function entryWithIcon(?string $path): object
+    /**
+     * An entry-shaped stub: sources() now delegates to TriviaIcons::resolve(),
+     * which reads ->icon and ->title, so the stub needs both -- a real Entry
+     * always has a title, even an empty one.
+     */
+    private function entryWithIcon(?string $path, string $title = 'untitled'): object
     {
-        return new class($path === null ? null : Asset::find('assets::'.$path))
+        return new class($path === null ? null : Asset::find('assets::'.$path), $title)
         {
-            public function __construct(public $icon) {}
+            public function __construct(public $icon, public $title) {}
         };
     }
 

@@ -2,10 +2,7 @@
 
 namespace App\Support;
 
-use Statamic\Facades\Collection;
-use Statamic\Facades\Entry;
 use Statamic\Facades\YAML;
-use Statamic\Fields\Value;
 
 /**
  * Publishes one tilesheet of every trivia icon.
@@ -20,10 +17,9 @@ class TilesheetGenerator
 {
     public const FILENAME = 'trivia-tilesheet.png';
 
-    public const COLLECTION = 'trivia';
-
     public function __construct(
         private Tilesheet $tilesheet,
+        private TriviaIcons $icons,
         private string $publicPath,
         private string $outputPath,
     ) {}
@@ -35,7 +31,10 @@ class TilesheetGenerator
         $temp = $asset.'.tmp';
 
         try {
-            $written = $this->tilesheet->write($temp, $this->sources($this->entries()));
+            $written = $this->tilesheet->write(
+                $temp,
+                array_column($this->icons->all(), 'path'),
+            );
 
             if ($written === null) {
                 return null;
@@ -69,52 +68,16 @@ class TilesheetGenerator
     }
 
     /**
-     * The icons, in tile order, deduped: the sheet is the set of icons, not
-     * one tile per entry.
+     * The icons, in tile order, deduped. Kept as a thin pass-through to
+     * TriviaIcons so callers that already hold a list of entries -- the tests
+     * do -- don't have to go through the collection query.
      *
      * @param  iterable<object>  $entries
      * @return list<string>
      */
     public function sources(iterable $entries): array
     {
-        $paths = [];
-
-        foreach ($entries as $entry) {
-            // The same unwrapping the fortune list does in default.blade.php:
-            // the field is a Value holding an AssetCollection.
-            $icon = $entry->icon;
-            $icon = $icon instanceof Value ? $icon->value() : $icon;
-            $icon = is_iterable($icon) ? collect($icon)->first() : $icon;
-
-            $path = $icon?->resolvedPath();
-
-            if ($path && ! in_array($path, $paths, strict: true)) {
-                $paths[] = $path;
-            }
-        }
-
-        return $paths;
-    }
-
-    /**
-     * Published trivia entries in the collection's own order -- title
-     * ascending, since trivia is neither dated nor orderable -- so the sheet
-     * reads left to right in the order the fortunes do. The sort has to be
-     * explicit: a bare query returns stache order.
-     */
-    private function entries(): \Illuminate\Support\Collection
-    {
-        $collection = Collection::findByHandle(self::COLLECTION);
-
-        if (! $collection) {
-            throw new \RuntimeException('Could not find the ['.self::COLLECTION.'] collection.');
-        }
-
-        return Entry::query()
-            ->where('collection', self::COLLECTION)
-            ->where('published', true)
-            ->orderBy($collection->sortField(), $collection->sortDirection())
-            ->get();
+        return array_column($this->icons->resolve($entries), 'path');
     }
 
     /**

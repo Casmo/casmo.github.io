@@ -6,6 +6,7 @@ use App\Support\SocialImage;
 use App\Support\SocialImageGenerator;
 use App\Support\Tilesheet;
 use App\Support\TilesheetGenerator;
+use App\Support\TriviaIcons;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Statamic\StaticSite\SSG;
@@ -45,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
             // into the build, since copyFiles() has already run by now.
             (new TilesheetGenerator(
                 new Tilesheet,
+                new TriviaIcons,
                 public_path(),
                 config('statamic.ssg.output_path'),
             ))->generate();
