@@ -15,6 +15,7 @@ _ide_helper.php
 .phpactor.json
 /.phpunit.cache
 .phpunit.result.cache
+/build
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
