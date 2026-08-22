@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Support\Tilesheet;
 use App\Support\TilesheetGenerator;
+use App\Support\TriviaIcons;
 use Statamic\Facades\Asset;
 use Statamic\Facades\Entry;
 use Statamic\Facades\YAML;
@@ -53,7 +54,12 @@ class TilesheetGeneratorTest extends TestCase
 
     private function generator(): TilesheetGenerator
     {
-        return new TilesheetGenerator(new Tilesheet, $this->public, $this->output);
+        return new TilesheetGenerator(
+            new Tilesheet,
+            new TriviaIcons,
+            $this->public,
+            $this->output,
+        );
     }
 
     private function sheet(): string
@@ -61,12 +67,16 @@ class TilesheetGeneratorTest extends TestCase
         return $this->public.'/assets/trivia-tilesheet.png';
     }
 
-    /** An entry-shaped stub: sources() only ever reads ->icon. */
-    private function entryWithIcon(?string $path): object
+    /**
+     * An entry-shaped stub: sources() now delegates to TriviaIcons::resolve(),
+     * which reads ->icon and ->title, so the stub needs both -- a real Entry
+     * always has a title, even an empty one.
+     */
+    private function entryWithIcon(?string $path, string $title = 'untitled'): object
     {
-        return new class($path === null ? null : Asset::find('assets::'.$path))
+        return new class($path === null ? null : Asset::find('assets::'.$path), $title)
         {
-            public function __construct(public $icon) {}
+            public function __construct(public $icon, public $title) {}
         };
     }
 
@@ -74,18 +84,19 @@ class TilesheetGeneratorTest extends TestCase
     {
         // Pinned rather than measured from the icons the generator itself
         // picked, so a broken query can't move both sides of the assertion.
-        // 8 icons today (2026-08-14), widest 15px (scorched-earth), tallest
-        // 14px (commander-keen): 8 * (15 + 1) - 1 = 127. Update when an icon
-        // is added or one of those two extremes changes.
+        // 11 icons today (2026-08-22), widest 16px (gobliiins), tallest 14px
+        // (commander-keen), so the cell is 16x14 and the sheet wraps to two
+        // rows: 10 * (16 + 1) - 1 = 169 wide, 2 * (14 + 1) - 1 = 29 tall.
+        // Update when an icon is added or one of those two extremes changes.
         $written = $this->generator()->generate();
 
-        $this->assertSame(['width' => 127, 'height' => 14], $written);
+        $this->assertSame(['width' => 169, 'height' => 29], $written);
         $this->assertFileExists($this->sheet());
     }
 
     public function test_it_matches_the_committed_asset_pixel_for_pixel(): void
     {
-        // The pinned 127x14 assertion above only catches a new icon changing
+        // The pinned 169x29 assertion above only catches a new icon changing
         // the grid's dimensions. It would miss an icon redrawn or swapped at
         // the same size, and the committed asset and its meta would then be
         // silently wrong until someone noticed. Compare pixels, not bytes:
@@ -138,8 +149,8 @@ class TilesheetGeneratorTest extends TestCase
         $meta = YAML::parse(file_get_contents($path));
 
         $this->assertSame([], $meta['data']);
-        $this->assertSame(127, $meta['width']);
-        $this->assertSame(14, $meta['height']);
+        $this->assertSame(169, $meta['width']);
+        $this->assertSame(29, $meta['height']);
         $this->assertSame('image/png', $meta['mime_type']);
         $this->assertNull($meta['duration']);
         $this->assertSame(filesize($this->sheet()), $meta['size']);
@@ -151,18 +162,20 @@ class TilesheetGeneratorTest extends TestCase
         // Trivia is neither dated nor orderable, so the collection sorts by
         // title ascending -- bio-menace first, volfied last. A bare query
         // would return stache order instead, so this pins the first and last
-        // tile pixel for pixel against its source.
+        // tile pixel for pixel against its source. Volfied is index 10, the
+        // first tile of the second row, which also covers the row wrap.
         $this->generator()->generate();
 
         $this->assertTileMatches(0, 'public/assets/trivia/1-bit-bio-menace-msdos-game.png');
-        $this->assertTileMatches(7, 'public/assets/trivia/volfied-1bit-dos-game.png');
+        $this->assertTileMatches(10, 'public/assets/trivia/volfied-1bit-dos-game.png');
     }
 
     /** Every pixel of the source appears at tile $index's computed offset. */
     private function assertTileMatches(int $index, string $source): void
     {
-        $cellWidth = 15;
+        $cellWidth = 16;
         $cellHeight = 14;
+        $columns = 10;
 
         $sheet = imagecreatefrompng($this->sheet());
         $icon = imagecreatefrompng(base_path($source));
@@ -170,8 +183,9 @@ class TilesheetGeneratorTest extends TestCase
         $width = imagesx($icon);
         $height = imagesy($icon);
 
-        $left = $index * ($cellWidth + 1) + intdiv($cellWidth - $width, 2);
-        $top = (int) ceil(($cellHeight - $height) / 2);
+        $left = ($index % $columns) * ($cellWidth + 1) + intdiv($cellWidth - $width, 2);
+        $top = intdiv($index, $columns) * ($cellHeight + 1)
+            + (int) ceil(($cellHeight - $height) / 2);
 
         for ($y = 0; $y < $height; $y++) {
             for ($x = 0; $x < $width; $x++) {
@@ -190,7 +204,7 @@ class TilesheetGeneratorTest extends TestCase
             Entry::query()->where('collection', 'trivia')->get()
         );
 
-        $this->assertCount(8, $paths);
+        $this->assertCount(11, $paths);
 
         foreach ($paths as $path) {
             $this->assertFileExists($path);

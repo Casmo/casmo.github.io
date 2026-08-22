@@ -56,7 +56,7 @@ class SocialImageGeneratorTest extends TestCase
         // broken filter can't move both sides of the assertion together.
         // 20 blog + 2 games + 4 pages today (2026-08-12). Bump this number
         // when a post, review or page is added.
-        $expected = 26;
+        $expected = 27;
 
         $written = $this->generator()->generate();
 
