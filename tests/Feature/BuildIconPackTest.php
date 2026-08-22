@@ -70,13 +70,31 @@ class BuildIconPackTest extends TestCase
         // The committed asset went three icons stale once already. The pack
         // depends on the collection, never on that file, so a stale committed
         // sheet cannot reach a buyer.
-        $this->runCommand();
+        //
+        // Proven, not just asserted: the committed asset is moved out of the
+        // way before the command runs. An implementation that copied it
+        // instead of regenerating it would fail outright with the source
+        // gone, where getimagesize() dimensions alone would pass unchanged
+        // either way (the committed file happens to already be 169x29).
+        $committed = base_path('public/assets/trivia-tilesheet.png');
+        $displaced = storage_path('framework/testing/trivia-tilesheet.png.displaced-for-test');
+
+        rename($committed, $displaced);
+
+        try {
+            $this->runCommand();
+        } finally {
+            rename($displaced, $committed);
+        }
+
+        $this->assertFileExists($committed, 'the committed asset must be restored regardless of the outcome above');
 
         $packed = getimagesize($this->out.'/pack/trivia-tilesheet.png');
 
         // 11 icons, cell 16x14, ten columns: 169x29.
         $this->assertSame(169, $packed[0]);
         $this->assertSame(29, $packed[1]);
+        $this->assertCount(11, glob($this->out.'/pack/icons/*.png'));
     }
 
     public function test_every_image_the_page_references_is_one_the_generator_writes(): void
