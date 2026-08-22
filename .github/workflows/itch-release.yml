@@ -1,0 +1,79 @@
+# Pushes the trivia icons to itch.io and builds the page description to paste.
+#
+# itch.io has no API for a page's description, so this automates the half that
+# can be: butler pushes the download, and the HTML comes out as an artifact.
+name: itch.io release
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'content/collections/trivia/**'
+      - 'public/assets/trivia/**'
+      - 'app/Support/Tilesheet*.php'
+      - 'app/Support/Itch*.php'
+      - 'app/Support/IconPack.php'
+      - 'app/Support/TriviaIcons.php'
+      - 'app/Support/Upscale.php'
+      - 'app/Support/Files.php'
+      - 'app/Console/Commands/BuildIconPack.php'
+      - '.github/workflows/itch-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two pushes in quick succession should not race to publish builds.
+concurrency:
+  group: "itch-release"
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      # No npm build: the command renders no Blade views, so it needs nothing
+      # from vite -- only an APP_KEY so the framework will boot.
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Build the pack and the page
+        run: php artisan trivia:pack --out=build/itch --base-url=https://mathieuderuiter.nl
+
+      # Downloaded from itch's own server rather than a marketplace action:
+      # this step holds a publishing credential.
+      - name: Install butler
+        run: |
+          curl -sL -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip
+          chmod +x butler
+          ./butler -V
+
+      - name: Push to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          COUNT=$(find build/itch/pack/icons -name '*.png' | wc -l | tr -d ' ')
+          ./butler push build/itch/pack \
+            casmo/1-bit-icons-from-ms-dos-games:icons \
+            --userversion "${COUNT}-${GITHUB_SHA::7}"
+
+      - name: Upload the page description
+        uses: actions/upload-artifact@v4
+        with:
+          name: itch-page
+          path: build/itch/page.html

@@ -90,6 +90,12 @@ Decisions live in [docs/adr/](docs/adr/).
   tilemap, which is hand-authored artwork: this one is derived from the collection and
   rewritten on every build.
 
+**Icon Pack**
+: The **Trivia** icons, their **Trivia Tilesheet** and upscaled copies of both,
+  published as a downloadable set on itch.io. Distinct from the tilesheet, which is
+  one image on the resources page: the pack is what somebody downloads, and it is
+  built from the collection on demand rather than committed.
+
 **Dungeon**
 : The pixel-art room across the bottom of every page, drawn as a grid of tiles cut from
   a single tilemap and authored by hand as a grid of coordinates. Artwork, not
