@@ -18,6 +18,7 @@ Spec: `docs/superpowers/specs/2026-08-22-itch-icon-pack-design.md`. Read it befo
 - **Never `imagecopyresampled`.** It interpolates. Pixel art is scaled with `imagecopyresized` only, at integer factors.
 - **Every GD destination** gets `imagealphablending($img, false)` and `imagesavealpha($img, true)`, and is filled with `imagecolorallocatealpha($img, 0, 0, 0, 127)` before anything is drawn. Verified: this preserves alpha exactly through `imagecopyresized`.
 - **Every write failure throws `RuntimeException` naming the path.** Existing convention in `TilesheetGenerator`.
+- **Shared plumbing, introduced in Task 4.** `App\Support\Files` owns `directory()` and `put()`; `Tests\Concerns\RemovesDirectories` owns the recursive test cleanup. Tasks 5 and 7 inject/use them rather than restating either. Do not add a private `directory()` or `put()` to any new class. `TilesheetGenerator` and `SocialImageGenerator` keep their own copies — they are tested and passing, and churning them is out of scope.
 - **Upscale factor is 4.** Sheet 169×29 → 676×116.
 - **Nothing this feature produces is committed.** All artefacts are derived on demand.
 - **The generated HTML carries no `class`, no `style`, no `<style>`, no `width`, no `height`.** itch.io sanitises description HTML and any of those may be dropped.
@@ -803,19 +804,122 @@ git commit -m "refactor: extract the trivia icon set into TriviaIcons"
 
 ---
 
-### Task 4: `IconPack`
+### Task 4: `Files`, the test trait, and `IconPack`
 
-Stage the directory butler pushes.
+Stage the directory butler pushes. This task also introduces the two shared
+helpers the remaining tasks lean on, because it is the first task that needs
+either.
 
 **Files:**
+- Create: `app/Support/Files.php`
+- Create: `tests/Concerns/RemovesDirectories.php`
 - Create: `app/Support/IconPack.php`
 - Test: `tests/Unit/IconPackTest.php`
 
 **Interfaces:**
 - Consumes: `TriviaIcons`' pair shape `array{path: string, title: string}` (Task 3) — as a plain array, not the class.
-- Produces: `App\Support\IconPack::write(string $staging, array $icons, string $tilesheet): int` — returns the icon count. Writes `<staging>/icons/*.png`, `<staging>/trivia-tilesheet.png`, `<staging>/README.txt`.
+- Produces:
+  - `App\Support\Files::directory(string $directory): string` — creates it if missing, returns it, throws `RuntimeException` naming the path. Tasks 5 and 7 use this.
+  - `App\Support\Files::put(string $path, string $contents): void` — throws `RuntimeException` naming the path. Task 7 uses this.
+  - `Tests\Concerns\RemovesDirectories::remove(string $path): void` — recursive delete, tolerates a missing path. Tasks 5 and 7 use this.
+  - `App\Support\IconPack::ICONS = 'icons'`, `::README = 'README.txt'` — Tasks 5 and 6 read `ICONS`.
+  - `App\Support\IconPack::write(string $staging, array $icons, string $tilesheet): int` — returns the icon count. Writes `<staging>/icons/*.png`, `<staging>/trivia-tilesheet.png`, `<staging>/README.txt`.
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Create the shared file helper**
+
+The mkdir idiom already exists twice in `app/Support` — as a private method on
+`TilesheetGenerator` and inlined in `SocialImageGenerator`. Three more copies were
+the alternative. `TilesheetGenerator` and `SocialImageGenerator` are deliberately
+left alone: they are tested and passing, and churning them buys nothing here.
+
+Create `app/Support/Files.php`:
+
+```php
+<?php
+
+namespace App\Support;
+
+/**
+ * The filesystem writes the generators share.
+ *
+ * Small on purpose. It exists so the same mkdir-and-check and the same
+ * write-and-check are not restated in every class that publishes a file, and
+ * so a failure always names the path that failed.
+ */
+final class Files
+{
+    /** @return string the directory, created if it was missing */
+    public function directory(string $directory): string
+    {
+        // The is_dir() re-check tolerates a directory created concurrently
+        // between the first check and the mkdir() call.
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            throw new \RuntimeException("Could not create directory [{$directory}].");
+        }
+
+        return $directory;
+    }
+
+    public function put(string $path, string $contents): void
+    {
+        // Suppressed so a failure surfaces as the exception rather than as a
+        // warning from somewhere inside the filesystem layer.
+        if (@file_put_contents($path, $contents) === false) {
+            throw new \RuntimeException("Could not write [{$path}].");
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Create the test trait**
+
+Three test files in this plan need the same recursive delete. Create
+`tests/Concerns/RemovesDirectories.php`:
+
+```php
+<?php
+
+namespace Tests\Concerns;
+
+/**
+ * Recursive delete for the throwaway directories these tests write into.
+ *
+ * A plain trait rather than a base class, so the unit tests that use it stay
+ * on PHPUnit's TestCase and never boot Laravel.
+ */
+trait RemovesDirectories
+{
+    protected function remove(string $path): void
+    {
+        if (! is_dir($path)) {
+            return;
+        }
+
+        foreach (scandir($path) as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+
+            $child = $path.'/'.$entry;
+
+            is_dir($child) ? $this->remove($child) : unlink($child);
+        }
+
+        rmdir($path);
+    }
+}
+```
+
+Confirm the autoloader picks up `Tests\Concerns`. `composer.json` maps `Tests\` to
+`tests/`, so no change should be needed — verify with:
+
+```bash
+php -r 'require "vendor/autoload.php"; var_dump(trait_exists("Tests\\Concerns\\RemovesDirectories"));'
+```
+
+Expected: `bool(true)`. If it is `false`, run `composer dump-autoload` and retry.
+
+- [ ] **Step 3: Write the failing test**
 
 Create `tests/Unit/IconPackTest.php`:
 
@@ -824,11 +928,15 @@ Create `tests/Unit/IconPackTest.php`:
 
 namespace Tests\Unit;
 
+use App\Support\Files;
 use App\Support\IconPack;
 use PHPUnit\Framework\TestCase;
+use Tests\Concerns\RemovesDirectories;
 
 class IconPackTest extends TestCase
 {
+    use RemovesDirectories;
+
     private string $directory;
 
     private string $staging;
@@ -852,23 +960,9 @@ class IconPackTest extends TestCase
         parent::tearDown();
     }
 
-    private function remove(string $path): void
+    private function pack(): IconPack
     {
-        if (! is_dir($path)) {
-            return;
-        }
-
-        foreach (scandir($path) as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
-            }
-
-            $child = $path.'/'.$entry;
-
-            is_dir($child) ? $this->remove($child) : unlink($child);
-        }
-
-        rmdir($path);
+        return new IconPack(new Files);
     }
 
     /** A 2x2 opaque white PNG at $name.png, returned as an absolute path. */
@@ -898,7 +992,7 @@ class IconPackTest extends TestCase
     {
         $sheet = $this->png('sheet');
 
-        $count = (new IconPack)->write($this->staging, $this->icons(), $sheet);
+        $count = $this->pack()->write($this->staging, $this->icons(), $sheet);
 
         $this->assertSame(2, $count);
         $this->assertFileExists($this->staging.'/icons/alley-cat.png');
@@ -914,7 +1008,7 @@ class IconPackTest extends TestCase
         // lossy version of what they paid for.
         $icons = $this->icons();
 
-        (new IconPack)->write($this->staging, $icons, $this->png('sheet'));
+        $this->pack()->write($this->staging, $icons, $this->png('sheet'));
 
         foreach ($icons as $icon) {
             $this->assertFileEquals(
@@ -926,7 +1020,7 @@ class IconPackTest extends TestCase
 
     public function test_the_readme_pairs_each_filename_with_its_own_title(): void
     {
-        (new IconPack)->write($this->staging, $this->icons(), $this->png('sheet'));
+        $this->pack()->write($this->staging, $this->icons(), $this->png('sheet'));
 
         $readme = file_get_contents($this->staging.'/README.txt');
 
@@ -942,7 +1036,7 @@ class IconPackTest extends TestCase
 
     public function test_the_readme_lists_the_icons_in_the_order_given(): void
     {
-        (new IconPack)->write($this->staging, $this->icons(), $this->png('sheet'));
+        $this->pack()->write($this->staging, $this->icons(), $this->png('sheet'));
 
         $readme = file_get_contents($this->staging.'/README.txt');
 
@@ -957,7 +1051,7 @@ class IconPackTest extends TestCase
     {
         // Anything else in here ships to buyers. page.html in particular is
         // written beside the staging directory, never inside it.
-        (new IconPack)->write($this->staging, $this->icons(), $this->png('sheet'));
+        $this->pack()->write($this->staging, $this->icons(), $this->png('sheet'));
 
         $entries = array_values(array_diff(scandir($this->staging), ['.', '..']));
         sort($entries);
@@ -972,7 +1066,7 @@ class IconPackTest extends TestCase
         mkdir($this->staging.'/icons', 0755, true);
         file_put_contents($this->staging.'/icons/removed-icon.png', 'stale');
 
-        (new IconPack)->write($this->staging, $this->icons(), $this->png('sheet'));
+        $this->pack()->write($this->staging, $this->icons(), $this->png('sheet'));
 
         $this->assertFileDoesNotExist($this->staging.'/icons/removed-icon.png');
     }
@@ -982,7 +1076,7 @@ class IconPackTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessageMatches('/missing\.png/');
 
-        (new IconPack)->write(
+        $this->pack()->write(
             $this->staging,
             [['path' => $this->directory.'/missing.png', 'title' => 'gone']],
             $this->png('sheet'),
@@ -991,13 +1085,13 @@ class IconPackTest extends TestCase
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 4: Run test to verify it fails**
 
 Run: `php artisan test --filter=IconPackTest`
 
 Expected: FAIL — `Class "App\Support\IconPack" not found`.
 
-- [ ] **Step 3: Write the implementation**
+- [ ] **Step 5: Write the implementation**
 
 Create `app/Support/IconPack.php`:
 
@@ -1023,6 +1117,8 @@ final class IconPack
 
     public const ICONS = 'icons';
 
+    public function __construct(private Files $files) {}
+
     /**
      * @param  list<array{path: string, title: string}>  $icons  in sheet order
      * @param  string  $tilesheet  absolute path to the regenerated sheet
@@ -1034,7 +1130,7 @@ final class IconPack
         // would otherwise linger from an earlier run and ship to buyers.
         $this->clear($staging);
 
-        $directory = $this->directory($staging.'/'.self::ICONS);
+        $directory = $this->files->directory($staging.'/'.self::ICONS);
 
         foreach ($icons as $icon) {
             $this->copy($icon['path'], $directory.'/'.basename($icon['path']));
@@ -1042,7 +1138,7 @@ final class IconPack
 
         $this->copy($tilesheet, $staging.'/'.basename($tilesheet));
 
-        $this->put($staging.'/'.self::README, $this->readme($icons));
+        $this->files->put($staging.'/'.self::README, $this->readme($icons));
 
         return count($icons);
     }
@@ -1086,13 +1182,6 @@ final class IconPack
         }
     }
 
-    private function put(string $path, string $contents): void
-    {
-        if (@file_put_contents($path, $contents) === false) {
-            throw new \RuntimeException("Could not write [{$path}].");
-        }
-    }
-
     private function clear(string $path): void
     {
         if (! is_dir($path)) {
@@ -1120,31 +1209,28 @@ final class IconPack
             throw new \RuntimeException("Could not remove [{$path}].");
         }
     }
-
-    /** @return string the directory, created if it was missing */
-    private function directory(string $directory): string
-    {
-        // The is_dir() re-check tolerates a directory created concurrently
-        // between the first check and the mkdir() call.
-        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
-            throw new \RuntimeException("Could not create directory [{$directory}].");
-        }
-
-        return $directory;
-    }
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 6: Run test to verify it passes**
 
 Run: `php artisan test --filter=IconPackTest`
 
 Expected: PASS, 7 tests.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 7: Run the full suite**
+
+The new `Files` class and the trait are shared, so check nothing else moved.
+
+Run: `php artisan test`
+
+Expected: PASS, 0 failures.
+
+- [ ] **Step 8: Commit**
 
 ```bash
-git add app/Support/IconPack.php tests/Unit/IconPackTest.php
+git add app/Support/Files.php app/Support/IconPack.php \
+        tests/Concerns/RemovesDirectories.php tests/Unit/IconPackTest.php
 git commit -m "feat: stage the itch.io icon pack directory"
 ```
 
@@ -1178,13 +1264,17 @@ Create `tests/Feature/ItchAssetsGeneratorTest.php`:
 
 namespace Tests\Feature;
 
+use App\Support\Files;
 use App\Support\ItchAssetsGenerator;
 use App\Support\TriviaIcons;
 use App\Support\Upscale;
+use Tests\Concerns\RemovesDirectories;
 use Tests\TestCase;
 
 class ItchAssetsGeneratorTest extends TestCase
 {
+    use RemovesDirectories;
+
     private string $output;
 
     protected function setUp(): void
@@ -1203,30 +1293,12 @@ class ItchAssetsGeneratorTest extends TestCase
         parent::tearDown();
     }
 
-    private function remove(string $path): void
-    {
-        if (! is_dir($path)) {
-            return;
-        }
-
-        foreach (scandir($path) as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
-            }
-
-            $child = $path.'/'.$entry;
-
-            is_dir($child) ? $this->remove($child) : unlink($child);
-        }
-
-        rmdir($path);
-    }
-
     private function generator(?string $output = null): ItchAssetsGenerator
     {
         return new ItchAssetsGenerator(
             new Upscale,
             new TriviaIcons,
+            new Files,
             base_path('public/assets/trivia-tilesheet.png'),
             $output ?? $this->output,
         );
@@ -1364,6 +1436,7 @@ class ItchAssetsGenerator
     public function __construct(
         private Upscale $upscale,
         private TriviaIcons $icons,
+        private Files $files,
         private string $tilesheet,
         private string $outputPath,
     ) {}
@@ -1381,7 +1454,7 @@ class ItchAssetsGenerator
     /** @return int the number of files written, the sheet included */
     public function generate(): int
     {
-        $root = $this->directory($this->outputPath.'/'.self::DIRECTORY);
+        $root = $this->files->directory($this->outputPath.'/'.self::DIRECTORY);
 
         $this->upscale->write(
             $root.'/'.self::filename($this->tilesheet),
@@ -1389,7 +1462,7 @@ class ItchAssetsGenerator
             self::FACTOR,
         );
 
-        $icons = $this->directory($root.'/'.IconPack::ICONS);
+        $icons = $this->files->directory($root.'/'.IconPack::ICONS);
 
         $written = 1;
 
@@ -1404,18 +1477,6 @@ class ItchAssetsGenerator
         }
 
         return $written;
-    }
-
-    /** @return string the directory, created if it was missing */
-    private function directory(string $directory): string
-    {
-        // The is_dir() re-check tolerates a directory created concurrently
-        // between the first check and the mkdir() call.
-        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
-            throw new \RuntimeException("Could not create directory [{$directory}].");
-        }
-
-        return $directory;
     }
 }
 ```
@@ -1437,12 +1498,14 @@ In `app/Providers/AppServiceProvider.php`, inside the `SSG::after` closure, afte
             (new ItchAssetsGenerator(
                 new Upscale,
                 new TriviaIcons,
+                new Files,
                 public_path('assets/'.TilesheetGenerator::FILENAME),
                 config('statamic.ssg.output_path'),
             ))->generate();
 ```
 
-Add `use App\Support\ItchAssetsGenerator;` and `use App\Support\Upscale;` to the imports.
+Add `use App\Support\Files;`, `use App\Support\ItchAssetsGenerator;` and
+`use App\Support\Upscale;` to the imports.
 
 - [ ] **Step 6: Run the full suite**
 
@@ -1636,8 +1699,8 @@ final class ItchPage
         $sheet = $base.'/'.ItchAssetsGenerator::filename($tilesheet);
 
         $lines = [
-            '<p><img src="'.$this->attribute($sheet).'" alt="'
-                .$this->attribute('Every icon in the pack on one grid').'" /></p>',
+            '<p><img src="'.$this->escape($sheet).'" alt="'
+                .$this->escape('Every icon in the pack on one grid').'" /></p>',
         ];
 
         if ($icons !== []) {
@@ -1649,8 +1712,8 @@ final class ItchPage
                     .ItchAssetsGenerator::filename($icon['path']);
 
                 // alt is empty on purpose: the fact beside it is the label.
-                $lines[] = '<li><img src="'.$this->attribute($source).'" alt="" /> '
-                    .$this->text($icon['title']).'</li>';
+                $lines[] = '<li><img src="'.$this->escape($source).'" alt="" /> '
+                    .$this->escape($icon['title']).'</li>';
             }
 
             $lines[] = '</ul>';
@@ -1659,12 +1722,13 @@ final class ItchPage
         return implode("\n", $lines)."\n";
     }
 
-    private function attribute(string $value): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    }
-
-    private function text(string $value): string
+    /**
+     * One escape for both attributes and text. ENT_QUOTES covers the quote
+     * that would break out of an attribute and ENT_SUBSTITUTE keeps malformed
+     * UTF-8 from emptying the string, so splitting this in two would be two
+     * identical methods.
+     */
+    private function escape(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
@@ -1716,12 +1780,15 @@ Create `tests/Feature/BuildIconPackTest.php`:
 
 namespace Tests\Feature;
 
-use App\Support\ItchAssetsGenerator;
 use App\Support\IconPack;
+use App\Support\ItchAssetsGenerator;
+use Tests\Concerns\RemovesDirectories;
 use Tests\TestCase;
 
 class BuildIconPackTest extends TestCase
 {
+    use RemovesDirectories;
+
     private string $out;
 
     protected function setUp(): void
@@ -1738,25 +1805,6 @@ class BuildIconPackTest extends TestCase
         $this->remove($this->out);
 
         parent::tearDown();
-    }
-
-    private function remove(string $path): void
-    {
-        if (! is_dir($path)) {
-            return;
-        }
-
-        foreach (scandir($path) as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
-            }
-
-            $child = $path.'/'.$entry;
-
-            is_dir($child) ? $this->remove($child) : unlink($child);
-        }
-
-        rmdir($path);
     }
 
     private function run(): void
@@ -1823,6 +1871,7 @@ class BuildIconPackTest extends TestCase
         (new ItchAssetsGenerator(
             new \App\Support\Upscale,
             new \App\Support\TriviaIcons,
+            new \App\Support\Files,
             base_path('public/assets/trivia-tilesheet.png'),
             $output,
         ))->generate();
@@ -1869,6 +1918,7 @@ Create `app/Console/Commands/BuildIconPack.php`:
 
 namespace App\Console\Commands;
 
+use App\Support\Files;
 use App\Support\IconPack;
 use App\Support\ItchPage;
 use App\Support\Tilesheet;
@@ -1898,6 +1948,7 @@ class BuildIconPack extends Command
         Tilesheet $tilesheet,
         IconPack $pack,
         ItchPage $page,
+        Files $files,
     ): int {
         $out = $this->option('out');
         $out = str_starts_with($out, '/') ? $out : base_path($out);
@@ -1916,7 +1967,7 @@ class BuildIconPack extends Command
 
         // $out, not $staging: the sheet is written here before IconPack runs,
         // and IconPack clears $staging as its first act.
-        $this->directory($out);
+        $files->directory($out);
 
         // Written outside the staging directory: anything inside it ships to
         // buyers as part of the download.
@@ -1926,7 +1977,7 @@ class BuildIconPack extends Command
 
         $count = $pack->write($staging, $resolved, $sheet);
 
-        $this->put($out.'/page.html', $page->render($resolved, $baseUrl, $sheet));
+        $files->put($out.'/page.html', $page->render($resolved, $baseUrl, $sheet));
 
         // Only the copy inside pack/ is shipped; this one was scratch.
         unlink($sheet);
@@ -1935,20 +1986,6 @@ class BuildIconPack extends Command
         $this->line("Page description written to {$out}/page.html");
 
         return self::SUCCESS;
-    }
-
-    private function put(string $path, string $contents): void
-    {
-        if (@file_put_contents($path, $contents) === false) {
-            throw new \RuntimeException("Could not write [{$path}].");
-        }
-    }
-
-    private function directory(string $directory): void
-    {
-        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
-            throw new \RuntimeException("Could not create directory [{$directory}].");
-        }
     }
 }
 ```
@@ -2031,6 +2068,7 @@ on:
       - 'app/Support/IconPack.php'
       - 'app/Support/TriviaIcons.php'
       - 'app/Support/Upscale.php'
+      - 'app/Support/Files.php'
       - 'app/Console/Commands/BuildIconPack.php'
       - '.github/workflows/itch-release.yml'
   workflow_dispatch:
