@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\Upscale;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
 
 class UpscaleTest extends TestCase
@@ -141,6 +142,7 @@ class UpscaleTest extends TestCase
         }
     }
 
+    #[WithoutErrorHandler]
     public function test_it_throws_when_the_source_cannot_be_read(): void
     {
         $this->expectException(\RuntimeException::class);
