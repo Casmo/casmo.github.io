@@ -84,7 +84,7 @@ class TilesheetGeneratorTest extends TestCase
     {
         // Pinned rather than measured from the icons the generator itself
         // picked, so a broken query can't move both sides of the assertion.
-        // 11 icons today (2026-08-22), widest 16px (gobliiins), tallest 14px
+        // 12 icons today (2026-08-25), widest 16px (gobliiins), tallest 14px
         // (commander-keen), so the cell is 16x14 and the sheet wraps to two
         // rows: 10 * (16 + 1) - 1 = 169 wide, 2 * (14 + 1) - 1 = 29 tall.
         // Update when an icon is added or one of those two extremes changes.
@@ -166,8 +166,8 @@ class TilesheetGeneratorTest extends TestCase
         // first tile of the second row, which also covers the row wrap.
         $this->generator()->generate();
 
-        $this->assertTileMatches(0, 'public/assets/trivia/1-bit-bio-menace-msdos-game.png');
-        $this->assertTileMatches(10, 'public/assets/trivia/volfied-1bit-dos-game.png');
+        $this->assertTileMatches(0, 'public/assets/trivia/arkanoid-1bit-breakout-dos-game.png');
+        $this->assertTileMatches(11, 'public/assets/trivia/volfied-1bit-dos-game.png');
     }
 
     /** Every pixel of the source appears at tile $index's computed offset. */
@@ -204,7 +204,7 @@ class TilesheetGeneratorTest extends TestCase
             Entry::query()->where('collection', 'trivia')->get()
         );
 
-        $this->assertCount(11, $paths);
+        $this->assertCount(12, $paths);
 
         foreach ($paths as $path) {
             $this->assertFileExists($path);

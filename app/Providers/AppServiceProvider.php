@@ -54,17 +54,17 @@ class AppServiceProvider extends ServiceProvider
                 config('statamic.ssg.output_path'),
             ))->generate();
 
-            // The upscaled images the itch.io page hotlinks. Output only:
-            // they are never shown on the site, and public/assets is an asset
-            // container that would want a .meta yaml for each one. Guarded on
-            // the tilesheet having actually been written -- generate() writes
-            // nothing when no entry has an icon, and upscaling the stale
-            // committed sheet in that case would publish it without a single
-            // icon beside it.
+            // The upscaled sheet the itch.io page hotlinks as its hero. Output
+            // only: it is never shown on the site, and public/assets is an
+            // asset container that would want a .meta yaml beside it. The
+            // individual icons need nothing here -- the page links them where
+            // the site already serves them. Guarded on the tilesheet having
+            // actually been written: generate() writes nothing when no entry
+            // has an icon, and upscaling the stale committed sheet in that
+            // case would publish it as though it were current.
             if ($tilesheet !== null) {
                 (new ItchAssetsGenerator(
                     new Upscale,
-                    new TriviaIcons,
                     new Files,
                     public_path('assets/'.TilesheetGenerator::FILENAME),
                     config('statamic.ssg.output_path'),

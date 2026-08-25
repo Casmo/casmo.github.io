@@ -27,8 +27,8 @@ class TriviaIconsTest extends TestCase
     {
         $pairs = $this->icons()->all();
 
-        // 11 published trivia entries today (2026-08-22), each with an icon.
-        $this->assertCount(11, $pairs);
+        // 12 published trivia entries today (2026-08-25), each with an icon.
+        $this->assertCount(12, $pairs);
 
         foreach ($pairs as $pair) {
             $this->assertFileExists($pair['path']);
@@ -49,8 +49,8 @@ class TriviaIconsTest extends TestCase
         sort($sorted, SORT_NATURAL);
 
         $this->assertSame($sorted, $titles);
-        $this->assertStringStartsWith('Bio Menace', $pairs[0]['title']);
-        $this->assertStringStartsWith('Volfied', $pairs[10]['title']);
+        $this->assertStringStartsWith('Arkanoid', $pairs[0]['title']);
+        $this->assertStringStartsWith('Volfied', $pairs[11]['title']);
     }
 
     public function test_the_title_belongs_to_the_path_beside_it(): void

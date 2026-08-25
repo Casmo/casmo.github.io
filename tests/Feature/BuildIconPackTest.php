@@ -6,7 +6,6 @@ use App\Support\Files;
 use App\Support\IconPack;
 use App\Support\ItchAssetsGenerator;
 use App\Support\TilesheetGenerator;
-use App\Support\TriviaIcons;
 use App\Support\Upscale;
 use Tests\Concerns\RemovesDirectories;
 use Tests\TestCase;
@@ -49,7 +48,7 @@ class BuildIconPackTest extends TestCase
         $this->assertFileExists($this->out.'/pack/trivia-tilesheet.png');
         $this->assertFileExists($this->out.'/pack/README.txt');
         $this->assertFileExists($this->out.'/page.html');
-        $this->assertCount(11, glob($this->out.'/pack/icons/*.png'));
+        $this->assertCount(12, glob($this->out.'/pack/icons/*.png'));
     }
 
     public function test_the_page_is_not_inside_the_pack(): void
@@ -91,30 +90,31 @@ class BuildIconPackTest extends TestCase
 
         $packed = getimagesize($this->out.'/pack/trivia-tilesheet.png');
 
-        // 11 icons, cell 16x14, ten columns: 169x29.
+        // 12 icons, cell 16x14, ten columns: 169x29 across two rows.
         $this->assertSame(169, $packed[0]);
         $this->assertSame(29, $packed[1]);
-        $this->assertCount(11, glob($this->out.'/pack/icons/*.png'));
+        $this->assertCount(12, glob($this->out.'/pack/icons/*.png'));
     }
 
-    public function test_every_image_the_page_references_is_one_the_generator_writes(): void
+    public function test_every_image_the_page_references_is_one_something_publishes(): void
     {
-        // The only test that crosses ItchPage and ItchAssetsGenerator, and so
-        // the only one that catches a drift in the -4x naming between them.
+        // The only test that crosses ItchPage, ItchAssetsGenerator and the
+        // committed assets, and so the only one that catches a drift between
+        // where the page points and where the images actually are.
         $this->runCommand();
 
         $html = file_get_contents($this->out.'/page.html');
 
         preg_match_all('/src="([^"]+)"/', $html, $matches);
 
-        $this->assertNotEmpty($matches[1]);
+        // The hero plus one per icon.
+        $this->assertCount(13, $matches[1]);
 
         $output = storage_path('framework/testing/itch-pack-assets');
         $this->remove($output);
 
         (new ItchAssetsGenerator(
             new Upscale,
-            new TriviaIcons,
             new Files,
             base_path('public/assets/trivia-tilesheet.png'),
             $output,
@@ -123,13 +123,32 @@ class BuildIconPackTest extends TestCase
         foreach ($matches[1] as $url) {
             $relative = parse_url($url, PHP_URL_PATH);
 
+            // The upscaled hero comes out of the SSG build; every other image
+            // is an icon the site already serves out of public/.
+            $expected = str_starts_with($relative, '/'.ItchAssetsGenerator::DIRECTORY.'/')
+                ? $output.$relative
+                : public_path(ltrim($relative, '/'));
+
             $this->assertFileExists(
-                $output.$relative,
+                $expected,
                 "the page references [{$url}] but nothing publishes it",
             );
         }
 
         $this->remove($output);
+    }
+
+    public function test_the_page_links_icons_at_their_authored_size(): void
+    {
+        // Only the hero is derived. If per-icon upscaling ever came back this
+        // would catch it, because the icon URLs would gain the -4x suffix.
+        $this->runCommand();
+
+        $html = file_get_contents($this->out.'/page.html');
+
+        $this->assertSame(1, substr_count($html, '-4x.png'));
+        $this->assertStringNotContainsString('/'.ItchAssetsGenerator::DIRECTORY.'/'.IconPack::ICONS.'/', $html);
+        $this->assertSame(12, substr_count($html, 'https://example.test/assets/trivia/'));
     }
 
     public function test_the_page_uses_the_base_url_it_was_given(): void
@@ -142,7 +161,7 @@ class BuildIconPackTest extends TestCase
             'https://example.test/'.ItchAssetsGenerator::DIRECTORY.'/',
             $html,
         );
-        $this->assertStringContainsString(IconPack::ICONS.'/', $html);
+        $this->assertStringContainsString('https://example.test/assets/trivia/', $html);
     }
 
     public function test_the_pack_and_the_generator_agree_on_the_sheet_filename(): void

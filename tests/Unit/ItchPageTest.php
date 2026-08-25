@@ -7,12 +7,20 @@ use PHPUnit\Framework\TestCase;
 
 class ItchPageTest extends TestCase
 {
+    private const PUBLIC = '/x/public';
+
     /** @return list<array{path: string, title: string}> */
     private function icons(): array
     {
         return [
-            ['path' => '/x/alley-cat-dos-game-1bit.png', 'title' => 'Alley Cat & its palette'],
-            ['path' => '/x/globliiins-1bit-ms-dos-game.png', 'title' => 'The three "i" are goblins'],
+            [
+                'path' => self::PUBLIC.'/assets/trivia/alley-cat-dos-game-1bit.png',
+                'title' => 'Alley Cat & its palette',
+            ],
+            [
+                'path' => self::PUBLIC.'/assets/trivia/globliiins-1bit-ms-dos-game.png',
+                'title' => 'The three "i" are goblins',
+            ],
         ];
     }
 
@@ -21,7 +29,8 @@ class ItchPageTest extends TestCase
         return (new ItchPage)->render(
             $this->icons(),
             $base,
-            '/x/trivia-tilesheet.png',
+            self::PUBLIC.'/assets/trivia-tilesheet.png',
+            self::PUBLIC,
         );
     }
 
@@ -37,7 +46,7 @@ class ItchPageTest extends TestCase
         $this->assertLessThan($list, $sheet, 'the sheet should precede the list');
     }
 
-    public function test_it_builds_absolute_urls_from_the_base(): void
+    public function test_the_hero_points_at_the_upscaled_sheet(): void
     {
         $html = $this->render('https://mathieuderuiter.nl');
 
@@ -45,9 +54,59 @@ class ItchPageTest extends TestCase
             'src="https://mathieuderuiter.nl/itch/trivia-tilesheet-4x.png"',
             $html,
         );
+    }
+
+    public function test_the_list_points_at_the_icons_the_site_already_serves(): void
+    {
+        // Not a derived copy: the icons are linked where they live, at the
+        // size they were drawn, so nothing has to be generated for them.
+        $html = $this->render('https://mathieuderuiter.nl');
+
         $this->assertStringContainsString(
-            'src="https://mathieuderuiter.nl/itch/icons/alley-cat-dos-game-1bit-4x.png"',
+            'src="https://mathieuderuiter.nl/assets/trivia/alley-cat-dos-game-1bit.png"',
             $html,
+        );
+        $this->assertStringContainsString(
+            'src="https://mathieuderuiter.nl/assets/trivia/globliiins-1bit-ms-dos-game.png"',
+            $html,
+        );
+
+        // The only -4x image on the page is the hero.
+        $this->assertSame(1, substr_count($html, '-4x.png'));
+        $this->assertStringNotContainsString('/itch/icons/', $html);
+    }
+
+    public function test_two_icons_sharing_a_filename_get_distinct_urls(): void
+    {
+        // Keeping the whole path rather than the basename is what stops two
+        // same-named icons in different folders collapsing onto one URL and
+        // putting the wrong picture beside a fact.
+        $html = (new ItchPage)->render(
+            [
+                ['path' => self::PUBLIC.'/assets/trivia/quake.png', 'title' => 'first'],
+                ['path' => self::PUBLIC.'/assets/pages/quake.png', 'title' => 'second'],
+            ],
+            'https://example.test',
+            self::PUBLIC.'/assets/trivia-tilesheet.png',
+            self::PUBLIC,
+        );
+
+        $this->assertStringContainsString('https://example.test/assets/trivia/quake.png', $html);
+        $this->assertStringContainsString('https://example.test/assets/pages/quake.png', $html);
+    }
+
+    public function test_it_rejects_an_icon_outside_the_document_root(): void
+    {
+        // Such an icon cannot be served at all, so emitting a URL for it would
+        // guarantee a 404 on a published page.
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('#/elsewhere/stray\.png#');
+
+        (new ItchPage)->render(
+            [['path' => '/elsewhere/stray.png', 'title' => 'nowhere']],
+            'https://example.test',
+            self::PUBLIC.'/assets/trivia-tilesheet.png',
+            self::PUBLIC,
         );
     }
 
@@ -56,7 +115,7 @@ class ItchPageTest extends TestCase
         $html = $this->render('https://example.test/');
 
         $this->assertStringContainsString('https://example.test/itch/', $html);
-        $this->assertStringNotContainsString('https://example.test//itch/', $html);
+        $this->assertStringNotContainsString('https://example.test//', $html);
     }
 
     public function test_it_lists_one_item_per_icon_paired_with_its_title(): void
@@ -68,7 +127,7 @@ class ItchPageTest extends TestCase
         // The pairing, not merely the presence of both: an off-by-one zip
         // would put the wrong fact beside an icon.
         $this->assertMatchesRegularExpression(
-            '#<li><img src="[^"]*alley-cat-dos-game-1bit-4x\.png" alt="" />\s*Alley Cat &amp; its palette</li>#',
+            '#<li><img src="[^"]*/assets/trivia/alley-cat-dos-game-1bit\.png" alt="" />\s*Alley Cat &amp; its palette</li>#',
             $html,
         );
     }
@@ -86,7 +145,8 @@ class ItchPageTest extends TestCase
     {
         // itch.io scrubs description HTML. Anything whose loss would change
         // the layout must not be load-bearing, so none of it is emitted at
-        // all -- the images are already the size they should be.
+        // all -- the icons are served at their authored size and the hero is
+        // already scaled.
         $html = $this->render();
 
         foreach (['class=', 'style=', '<style', 'width=', 'height=', '<script'] as $forbidden) {
@@ -106,7 +166,12 @@ class ItchPageTest extends TestCase
 
     public function test_it_renders_an_empty_set_without_a_list(): void
     {
-        $html = (new ItchPage)->render([], 'https://example.test', '/x/trivia-tilesheet.png');
+        $html = (new ItchPage)->render(
+            [],
+            'https://example.test',
+            self::PUBLIC.'/assets/trivia-tilesheet.png',
+            self::PUBLIC,
+        );
 
         $this->assertStringNotContainsString('<ul>', $html);
         $this->assertStringContainsString('trivia-tilesheet-4x.png', $html);

@@ -2,6 +2,22 @@
 
 Date: 2026-08-22
 
+> **Amended 2026-08-25.** The per-icon 4× upscales described under *Upscaling*
+> and *`ItchAssetsGenerator`* below are gone. The page now links each icon where
+> the site already serves it, at the size it was drawn, and only the tilesheet is
+> still upscaled — it is the hero image, and 169×29 is too small to read as
+> artwork. Icons on the page are consequently 8–16px rather than 32–64px.
+>
+> Two consequences worth recording. `ItchAssetsGenerator` no longer needs
+> `TriviaIcons` and writes exactly one file. And because `ItchPage` now derives
+> each URL from the icon's path relative to the document root rather than from
+> its basename, the basename-collision hazard noted against that class is closed:
+> two icons sharing a filename in different asset folders stay two distinct URLs.
+>
+> The rest of this document stands as written, including the reasoning about
+> itch's sanitiser — the markup still carries no CSS, which is why the hero is
+> pre-scaled rather than sized in HTML.
+
 ## Problem
 
 The trivia icons are published on itch.io as

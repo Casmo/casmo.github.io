@@ -10,23 +10,33 @@ namespace App\Support;
  * mangles content on round-trip, so the markup here is the canonical copy and
  * is deliberately plain: no class, no style, no width, no height. Anything
  * the sanitiser might drop would otherwise be load-bearing, and the page
- * would degrade silently. The images arrive already scaled instead.
+ * would degrade silently.
  *
- * Deliberately free of Laravel and Statamic: arrays and a string in, a string
+ * The list links each icon where the site already serves it, at the size it
+ * was drawn. Only the tilesheet is a derived image, because it is the hero and
+ * 169x29 is too small to read as artwork.
+ *
+ * Deliberately free of Laravel and Statamic: arrays and strings in, a string
  * out, so what it produces is asserted directly.
  */
 final class ItchPage
 {
     /**
      * @param  list<array{path: string, title: string}>  $icons  in sheet order
-     * @param  string  $baseUrl  where the upscales are published
+     * @param  string  $baseUrl  the site the images are served from
      * @param  string  $tilesheet  path to the sheet, for its published name
+     * @param  string  $publicPath  the document root the icon paths sit under
      */
-    public function render(array $icons, string $baseUrl, string $tilesheet): string
-    {
-        $base = rtrim($baseUrl, '/').'/'.ItchAssetsGenerator::DIRECTORY;
+    public function render(
+        array $icons,
+        string $baseUrl,
+        string $tilesheet,
+        string $publicPath,
+    ): string {
+        $base = rtrim($baseUrl, '/');
 
-        $sheet = $base.'/'.ItchAssetsGenerator::filename($tilesheet);
+        $sheet = $base.'/'.ItchAssetsGenerator::DIRECTORY
+            .'/'.ItchAssetsGenerator::filename($tilesheet);
 
         $lines = [
             '<p><img src="'.$this->escape($sheet).'" alt="'
@@ -38,8 +48,7 @@ final class ItchPage
             $lines[] = '<ul>';
 
             foreach ($icons as $icon) {
-                $source = $base.'/'.IconPack::ICONS.'/'
-                    .ItchAssetsGenerator::filename($icon['path']);
+                $source = $base.'/'.$this->relative($icon['path'], $publicPath);
 
                 // alt is empty on purpose: the fact beside it is the label.
                 $lines[] = '<li><img src="'.$this->escape($source).'" alt="" /> '
@@ -50,6 +59,29 @@ final class ItchPage
         }
 
         return implode("\n", $lines)."\n";
+    }
+
+    /**
+     * Where the site serves an icon, derived from where it sits on disk.
+     *
+     * The whole path is kept rather than the basename, so two icons with the
+     * same filename in different asset folders stay two distinct URLs instead
+     * of collapsing onto one and putting the wrong picture beside a fact.
+     *
+     * An icon outside the document root cannot be served at all, so that
+     * throws rather than emitting a URL that is certain to 404.
+     */
+    private function relative(string $path, string $publicPath): string
+    {
+        $root = rtrim($publicPath, '/').'/';
+
+        if (! str_starts_with($path, $root)) {
+            throw new \RuntimeException(
+                "The icon at [{$path}] is not under [{$root}], so it has no public URL."
+            );
+        }
+
+        return substr($path, strlen($root));
     }
 
     /**

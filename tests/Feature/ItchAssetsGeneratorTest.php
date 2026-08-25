@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Support\Files;
 use App\Support\ItchAssetsGenerator;
-use App\Support\TriviaIcons;
 use App\Support\Upscale;
 use Tests\Concerns\RemovesDirectories;
 use Tests\TestCase;
@@ -35,30 +34,21 @@ class ItchAssetsGeneratorTest extends TestCase
     {
         return new ItchAssetsGenerator(
             new Upscale,
-            new TriviaIcons,
             new Files,
             base_path('public/assets/trivia-tilesheet.png'),
             $output ?? $this->output,
         );
     }
 
-    public function test_it_writes_an_upscale_of_the_sheet_and_of_every_icon(): void
+    public function test_it_writes_an_upscale_of_the_sheet(): void
     {
         $written = $this->generator()->generate();
 
-        // 11 icons plus the sheet.
-        $this->assertSame(12, $written);
+        // The committed sheet is 169x29 with 12 icons (2026-08-25). Update
+        // alongside TilesheetGeneratorTest when an icon is added.
+        $this->assertSame(['width' => 169 * 4, 'height' => 29 * 4], $written);
 
         $this->assertFileExists($this->output.'/itch/trivia-tilesheet-4x.png');
-        $this->assertFileExists($this->output.'/itch/icons/volfied-1bit-dos-game-4x.png');
-        $this->assertCount(11, glob($this->output.'/itch/icons/*.png'));
-    }
-
-    public function test_it_scales_the_sheet_by_four(): void
-    {
-        // The committed sheet is 169x29 with 11 icons (2026-08-22). Update
-        // alongside TilesheetGeneratorTest when an icon is added.
-        $this->generator()->generate();
 
         $size = getimagesize($this->output.'/itch/trivia-tilesheet-4x.png');
 
@@ -66,22 +56,26 @@ class ItchAssetsGeneratorTest extends TestCase
         $this->assertSame(29 * 4, $size[1]);
     }
 
-    public function test_it_scales_each_icon_by_four(): void
+    public function test_it_derives_nothing_per_icon(): void
     {
+        // The page links the icons where the site already serves them, at the
+        // size they were drawn, so there is nothing per-icon to publish. A
+        // stray icons/ directory here would mean the upscaling came back.
         $this->generator()->generate();
 
-        $source = getimagesize(base_path('public/assets/trivia/volfied-1bit-dos-game.png'));
-        $scaled = getimagesize($this->output.'/itch/icons/volfied-1bit-dos-game-4x.png');
+        $this->assertDirectoryDoesNotExist($this->output.'/itch/icons');
 
-        $this->assertSame($source[0] * 4, $scaled[0]);
-        $this->assertSame($source[1] * 4, $scaled[1]);
+        $this->assertSame(
+            ['/itch/trivia-tilesheet-4x.png'],
+            $this->snapshot($this->output),
+        );
     }
 
     public function test_it_writes_nothing_into_public(): void
     {
-        // These images are never shown on the site and public/assets is a
+        // This image is never shown on the site and public/assets is a
         // Statamic container -- anything landing there would want a .meta
-        // yaml committed beside it. They exist only for itch.io to hotlink.
+        // yaml committed beside it. It exists only for itch.io to hotlink.
         $before = $this->snapshot(base_path('public/assets'));
 
         $this->generator()->generate();
@@ -110,8 +104,8 @@ class ItchAssetsGeneratorTest extends TestCase
 
     public function test_filename_appends_the_factor_suffix(): void
     {
-        // Task 6 builds page URLs from this, so a drift here is a page of
-        // broken images.
+        // ItchPage builds the hero's URL from this, so a drift here is a
+        // broken image at the top of the page.
         $this->assertSame(
             'volfied-1bit-dos-game-4x.png',
             ItchAssetsGenerator::filename('/anywhere/volfied-1bit-dos-game.png'),
