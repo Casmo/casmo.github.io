@@ -61,7 +61,12 @@ class BuildIconPack extends Command
 
         $count = $pack->write($staging, $resolved, $sheet);
 
-        $files->put($out.'/page.html', $page->render($resolved, $baseUrl, $sheet));
+        $files->put($out.'/page.html', $page->render(
+            $resolved,
+            $baseUrl,
+            $sheet,
+            public_path(),
+        ));
 
         // Only the copy inside pack/ is shipped; this one was scratch.
         unlink($sheet);
