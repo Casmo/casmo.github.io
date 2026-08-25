@@ -39,7 +39,7 @@ class ItchPageTest extends TestCase
         $html = $this->render();
 
         $sheet = strpos($html, 'trivia-tilesheet-4x.png');
-        $list = strpos($html, '<ul>');
+        $list = strpos($html, '<h2>Every icon</h2>');
 
         $this->assertNotFalse($sheet);
         $this->assertNotFalse($list);
@@ -122,12 +122,17 @@ class ItchPageTest extends TestCase
     {
         $html = $this->render();
 
-        $this->assertSame(2, substr_count($html, '<li>'));
+        // One <br /> per row, and no list markup: itch's own list styling puts
+        // bullets and spacing around each item, which reads wrong when the
+        // icon is already the bullet.
+        $this->assertSame(2, substr_count($html, '<br />'));
+        $this->assertStringNotContainsString('<ul>', $html);
+        $this->assertStringNotContainsString('<li>', $html);
 
         // The pairing, not merely the presence of both: an off-by-one zip
         // would put the wrong fact beside an icon.
         $this->assertMatchesRegularExpression(
-            '#<li><img src="[^"]*/assets/trivia/alley-cat-dos-game-1bit\.png" alt="" />\s*Alley Cat &amp; its palette</li>#',
+            '#<img src="[^"]*/assets/trivia/alley-cat-dos-game-1bit\.png" alt="" />\s*Alley Cat &amp; its palette<br />#',
             $html,
         );
     }
@@ -173,7 +178,8 @@ class ItchPageTest extends TestCase
             self::PUBLIC,
         );
 
-        $this->assertStringNotContainsString('<ul>', $html);
+        $this->assertStringNotContainsString('<h2>', $html);
+        $this->assertStringNotContainsString('<br />', $html);
         $this->assertStringContainsString('trivia-tilesheet-4x.png', $html);
     }
 }
