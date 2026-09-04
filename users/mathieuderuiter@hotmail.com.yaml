@@ -9,6 +9,7 @@ preferences:
     blog:
       view: list
       after_save: continue_editing
+      per_page: 100
     games:
       view: list
     trivia:
