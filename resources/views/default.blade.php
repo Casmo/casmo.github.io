@@ -8,9 +8,10 @@
         @vite(['resources/css/site.css', 'resources/js/site.js'])
         <meta property="og:title" content="{{ $page->title ?? $site->title }}">
         <meta property="og:description" content="{{ $page->description ?? $site->description ?? preg_replace('/\s+/', ' ', strip_tags(\App\Support\Palette::render((string) $page->content))) ?? '' }}">
+        <meta name="twitter:card" content="{{ $page->image ?? $site->image ?? 'https://mathieuderuiter.nl/assets/pages/' . ($page->slug ?? $site->slug) . '.png' }}">
         <meta property="og:image" content="{{ $page->image ?? $site->image ?? 'https://mathieuderuiter.nl/assets/pages/' . ($page->slug ?? $site->slug) . '.png' }}">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
+        <meta property="og:image:width" content="2400">
+        <meta property="og:image:height" content="1260">
         <meta property="og:url" content="https://mathieuderuiter.nl{{ $page->url ?? $site->url }}">
         <meta name="author" content="Mathieu de Ruiter">
     </head>
