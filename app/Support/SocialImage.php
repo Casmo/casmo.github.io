@@ -3,7 +3,7 @@
 namespace App\Support;
 
 /**
- * Renders one 1200x630 social image: a prompt line, the entry's title as the
+ * Renders one 2400x1260 social image: a prompt line, the entry's title as the
  * output of `cat`, and an identity line. Deliberately free of Laravel and
  * Statamic -- it takes strings and absolute paths, so the layout can be tested
  * without booting anything.
@@ -12,14 +12,14 @@ namespace App\Support;
  */
 class SocialImage
 {
-    public const WIDTH = 1200;
+    public const WIDTH = 2400;
 
-    public const HEIGHT = 630;
+    public const HEIGHT = 1260;
 
     /** The character cell every position is a multiple of, as on the site. */
-    private const CELL = 42;
+    private const CELL = 84;
 
-    private const MARGIN = 72;
+    private const MARGIN = 144;
 
     private const MEASURE = self::WIDTH - self::MARGIN * 2;
 
@@ -32,11 +32,11 @@ class SocialImage
     /** Largest first: the first size the title fits at wins. */
     private const LADDER = [118, 96, 78, 64, 54, 46, 40];
 
-    private const PROMPT_SIZE = 22;
+    private const PROMPT_SIZE = 44;
 
-    private const IDENTITY_SIZE = 20;
+    private const IDENTITY_SIZE = 40;
 
-    private const AVATAR_SIZE = 56;
+    private const AVATAR_SIZE = 112;
 
     private const BACKGROUND = '#1f2329';
 
