@@ -54,9 +54,9 @@ class SocialImageGeneratorTest extends TestCase
     {
         // Pinned rather than computed from the generator's own query, so a
         // broken filter can't move both sides of the assertion together.
-        // 20 blog + 2 games + 4 pages today (2026-08-12). Bump this number
+        // 28 routed entries today (2026-11-07). Bump this number
         // when a post, review or page is added.
-        $expected = 27;
+        $expected = 28;
 
         $written = $this->generator()->generate();
 
