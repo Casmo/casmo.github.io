@@ -74,3 +74,9 @@ tabs:
               type: text
               display: 'Terminal filename'
               instructions: 'Optional. Overrides the file being cat''d, which defaults to the slug.'
+          -
+            handle: social_artwork
+            field:
+              type: text
+              display: 'Social artwork'
+              instructions: 'Optional. A PNG under resources/img (e.g. artwork/ai-journey.png) that replaces the default background of this entry''s social image.'

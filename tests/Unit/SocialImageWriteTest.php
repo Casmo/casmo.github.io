@@ -291,6 +291,35 @@ class SocialImageWriteTest extends TestCase
         $image->write($this->destination, 'Nostalgia', 'mathieu@laptop:~$ cat nostalgia.txt', 'mathieuderuiter.nl', null);
     }
 
+    public function test_a_missing_artwork_override_fails_loudly(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        $this->image()->write(
+            $this->destination,
+            'Nostalgia',
+            'mathieu@laptop:~$ cat nostalgia.txt',
+            'mathieuderuiter.nl',
+            null,
+            dirname(__DIR__, 2).'/resources/img/does-not-exist.png',
+        );
+    }
+
+    public function test_an_artwork_override_replaces_the_background(): void
+    {
+        $artwork = dirname(__DIR__, 2).'/resources/img/artwork/ai-journey.png';
+        $write = fn (?string $artwork) => $this->image()->write(
+            $this->destination, 'Nostalgia', 'mathieu@laptop:~$ cat nostalgia.txt', 'mathieuderuiter.nl', null, $artwork,
+        );
+
+        $write(null);
+        $default = md5_file($this->destination);
+
+        $write($artwork);
+
+        $this->assertNotSame($default, md5_file($this->destination));
+    }
+
     public function test_an_unusable_font_fails_loudly(): void
     {
         $resources = dirname(__DIR__, 2).'/resources';
