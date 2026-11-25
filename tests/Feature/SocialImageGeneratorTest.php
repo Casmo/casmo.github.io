@@ -54,9 +54,9 @@ class SocialImageGeneratorTest extends TestCase
     {
         // Pinned rather than computed from the generator's own query, so a
         // broken filter can't move both sides of the assertion together.
-        // 28 routed entries today (2026-11-07). Bump this number
+        // 29 routed entries today (2026-11-25). Bump this number
         // when a post, review or page is added.
-        $expected = 28;
+        $expected = 29;
 
         $written = $this->generator()->generate();
 
@@ -75,6 +75,32 @@ class SocialImageGeneratorTest extends TestCase
         [$width, $height] = getimagesize($this->output.'/assets/pages/home.png');
         $this->assertSame(1200, $width);
         $this->assertSame(630, $height);
+    }
+
+    public function test_an_entry_can_bring_its_own_artwork(): void
+    {
+        $this->generator()->generate();
+
+        $generated = $this->output.'/assets/pages/the-ups-and-downs-of-my-ai-journey.png';
+        $default = $this->output.'/assets/pages/default-artwork.png';
+
+        // The same card, but on the default constellation.
+        $image = new SocialImage(
+            titleFont: resource_path('fonts/IBMPlexMono-Bold.ttf'),
+            chromeFont: resource_path('fonts/IBMPlexMono-Regular.ttf'),
+            artwork: resource_path('img/og-background.png'),
+            avatar: resource_path('img/casmo.png'),
+        );
+        $image->write(
+            $default,
+            'The ups and downs of my AI journey',
+            $image->prompt('mathieu@laptop', '~/blog/engineering', 'the-ups-and-downs-of-my-ai-journey.txt'),
+            SocialImageGenerator::DOMAIN,
+            'November 25, 2026',
+        );
+
+        $this->assertFileExists($generated);
+        $this->assertNotSame(md5_file($default), md5_file($generated));
     }
 
     public function test_it_skips_entries_that_have_no_url(): void

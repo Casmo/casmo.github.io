@@ -232,15 +232,21 @@ class SocialImage
         return $this->width($this->chromeFont, self::PROMPT_SIZE, $line) <= self::MEASURE;
     }
 
-    public function write(string $destination, string $title, string $prompt, string $domain, ?string $date): void
+    /**
+     * $artwork swaps the default constellation for one entry's own background.
+     * It is veiled the same way, so the card still reads as one of the set.
+     */
+    public function write(string $destination, string $title, string $prompt, string $domain, ?string $date, ?string $artwork = null): void
     {
-        $this->validateAssets();
+        $artwork ??= $this->artwork;
+
+        $this->validateAssets($artwork);
 
         $image = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
         imagealphablending($image, true);
         imagefill($image, 0, 0, $this->colour($image, self::BACKGROUND));
 
-        $this->drawBackground($image);
+        $this->drawBackground($image, $artwork);
         $this->drawPrompt($image, $prompt);
         $this->drawTitle($image, $title);
         $this->drawIdentity($image, $domain, $date);
@@ -256,7 +262,7 @@ class SocialImage
      * first -- which a dateless entry (every `pages` and `games` entry) never
      * does for the chrome font. Check all four up front instead.
      */
-    private function validateAssets(): void
+    private function validateAssets(string $artwork): void
     {
         foreach ([$this->titleFont, $this->chromeFont] as $font) {
             if (! is_file($font) || ! is_readable($font)) {
@@ -268,7 +274,7 @@ class SocialImage
             }
         }
 
-        foreach ([$this->artwork, $this->avatar] as $path) {
+        foreach ([$artwork, $this->avatar] as $path) {
             if (! is_file($path) || ! is_readable($path)) {
                 throw new \RuntimeException("Could not read image [{$path}].");
             }
@@ -276,9 +282,9 @@ class SocialImage
     }
 
     /** The constellation artwork, veiled so it never competes with the title. */
-    private function drawBackground(\GdImage $image): void
+    private function drawBackground(\GdImage $image, string $path): void
     {
-        $artwork = $this->load($this->artwork);
+        $artwork = $this->load($path);
 
         imagecopyresampled(
             $image, $artwork,

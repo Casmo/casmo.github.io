@@ -45,12 +45,24 @@ class SocialImageGenerator
                 $this->image->prompt(Terminal::host($this->author($entry)), $path, $file),
                 self::DOMAIN,
                 $entry->date()?->format('F j, Y'),
+                $this->artwork($entry),
             );
 
             $written++;
         }
 
         return $written;
+    }
+
+    /**
+     * An entry's own background, named relative to resources/img. A name that
+     * points nowhere fails the build in SocialImage rather than falling back.
+     */
+    private function artwork($entry): ?string
+    {
+        $artwork = $entry->value('social_artwork');
+
+        return filled($artwork) ? resource_path('img/'.$artwork) : null;
     }
 
     /** The author's name, for the user half of the prompt. */
